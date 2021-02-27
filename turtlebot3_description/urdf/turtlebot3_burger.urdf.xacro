@@ -36,6 +36,37 @@
     </inertial>
   </link>
 
+  <joint name="table_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="table_link"/>
+    <origin xyz="-0.032 0.0 0.194" rpy="0 0 0"/>
+  </joint>
+
+  <link name="table_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://turtlebot3_description/meshes/table/burger_table.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="light_black"/>
+    </visual>
+
+    <collision>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.140 0.140 0.009 "/>
+      </geometry>
+    </collision>
+
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="0.0995"/>
+      <inertia ixx="1.92366666667e-04" ixy="0" ixz="0"
+               iyy="1.92366666667e-04" iyz="0"
+               izz="3.25033333333e-04" />
+      </inertial>
+  </link>
+
   <joint name="wheel_left_joint" type="continuous">
     <parent link="base_link"/>
     <child link="wheel_left_link"/>
@@ -161,5 +192,34 @@
                izz="0.001" />
     </inertial>
   </link>
+
+  <joint name="camera_joint" type="fixed">
+    <origin xyz="0.040 -0.011 0.130" rpy="0 0.174 0"/>
+    <parent link="base_link"/>
+    <child link="camera_link"/>
+  </joint>
+
+  <link name="camera_link">
+    <collision>
+      <origin xyz="0.005 0.011 0.013" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.015 0.030 0.027"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <joint name="camera_rgb_joint" type="fixed">
+    <origin xyz="0.003 0.011 0.009" rpy="0 0 0"/>
+    <parent link="camera_link"/>
+    <child link="camera_rgb_frame"/>
+  </joint>
+  <link name="camera_rgb_frame"/>
+
+  <joint name="camera_rgb_optical_joint" type="fixed">
+    <origin xyz="0 0 0" rpy="-1.57 0 -1.57"/>
+    <parent link="camera_rgb_frame"/>
+    <child link="camera_rgb_optical_frame"/>
+  </joint>
+  <link name="camera_rgb_optical_frame"/>
 
 </robot>

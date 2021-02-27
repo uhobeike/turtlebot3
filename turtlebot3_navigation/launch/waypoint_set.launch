@@ -1,0 +1,20 @@
+<launch>
+  <!-- Arguments -->
+  <arg name="map_file" default="$(find turtlebot3_navigation)/maps/map_honban.yaml"/>
+  <arg name="open_rviz" default="true"/>
+
+  <!-- Run the map server -->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(arg map_file)" />
+  
+  <!-- Node Run -->
+  <node pkg="turtlebot3_navigation" name="waypoint_set"
+    type="waypoint_controller_rviz.py" required="true" output="screen">
+  </node>
+
+  <!-- rviz -->
+  <group if="$(arg open_rviz)"> 
+    <node pkg="rviz" type="rviz" name="rviz" required="true"
+      args="-d $(find turtlebot3_navigation)/rviz/turtlebot3_navigation_waypoint_set.rviz">
+    </node>
+  </group>
+</launch>
