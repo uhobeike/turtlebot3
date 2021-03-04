@@ -175,7 +175,6 @@ int main(int argc, char** argv)
     ros::NodeHandle nh;
     ros::Publisher pub_pose_ini, pub_pose_way;
     ros::Time tmp_time = ros::Time::now();
-    nh.setParam("waypoint_area_threshold", 0.5);
 
     ros::Subscriber sub_key = nh.subscribe("goal_key", 1,  goal_key_Callback);
     ros::Subscriber sub_pos = nh.subscribe("amcl_pose", 1,  posi_Callback);
@@ -183,7 +182,12 @@ int main(int argc, char** argv)
 
     pub_pose_way = nh.advertise<geometry_msgs::PoseArray>("waypoint", 1, true);
 
-    ifstream f_r("/home/ikebe/waypoint.csv",std::ios::in);
+    std::string fname(argv[1]);
+    ifstream f_r(fname.c_str(), std::ios::in);
+    if (f_r.fail()) {
+        ROS_ERROR("Map_server could not open %s.", fname.c_str());
+        exit(-1);
+    }
 
     vector<vector<string>> waypoint_read;
     string line,field;
@@ -231,7 +235,7 @@ int main(int argc, char** argv)
     int point_number=0;
     int next_point_flag = 0;
     int goal_point_flag = 0;
-    double area_threshold;
+    double area_threshold = 0.5;
     while(ros::ok())
     {  
         nh.getParam("waypoint_area_threshold", area_threshold);
@@ -246,7 +250,7 @@ int main(int argc, char** argv)
                 goal.target_pose.pose.position.y    = stod(waypoint_read[point_number][1]);
                 goal.target_pose.pose.orientation.z = stod(waypoint_read[point_number][2]);
                 goal.target_pose.pose.orientation.w = stod(waypoint_read[point_number][3]);
-
+                goal.target_pose.header.stamp         = ros::Time::now();
                 ac.sendGoal(goal);
 
                 waypoint_nearly_check(waypoint_read, posi_set, point_number, goal_point_flag, area_threshold);
@@ -259,6 +263,7 @@ int main(int argc, char** argv)
                 goal.target_pose.pose.position.y    = stod(waypoint_read[point_number][1]);
                 goal.target_pose.pose.orientation.z = stod(waypoint_read[point_number][2]);
                 goal.target_pose.pose.orientation.w = stod(waypoint_read[point_number][3]);
+                goal.target_pose.header.stamp         = ros::Time::now();
 
                 ac.sendGoal(goal);
 
