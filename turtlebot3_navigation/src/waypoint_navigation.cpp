@@ -250,7 +250,7 @@ int main(int argc, char** argv)
                 goal.target_pose.pose.position.y    = stod(waypoint_read[point_number][1]);
                 goal.target_pose.pose.orientation.z = stod(waypoint_read[point_number][2]);
                 goal.target_pose.pose.orientation.w = stod(waypoint_read[point_number][3]);
-                goal.target_pose.header.stamp         = ros::Time::now();
+                goal.target_pose.header.stamp       = ros::Time::now();
                 ac.sendGoal(goal);
 
                 waypoint_nearly_check(waypoint_read, posi_set, point_number, goal_point_flag, area_threshold);
@@ -263,7 +263,7 @@ int main(int argc, char** argv)
                 goal.target_pose.pose.position.y    = stod(waypoint_read[point_number][1]);
                 goal.target_pose.pose.orientation.z = stod(waypoint_read[point_number][2]);
                 goal.target_pose.pose.orientation.w = stod(waypoint_read[point_number][3]);
-                goal.target_pose.header.stamp         = ros::Time::now();
+                goal.target_pose.header.stamp       = ros::Time::now();
 
                 ac.sendGoal(goal);
 
