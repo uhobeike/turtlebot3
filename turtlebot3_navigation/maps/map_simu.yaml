@@ -1,4 +1,4 @@
-image: /home/ikebe/non_active/turtlebot3/src/turtlebot3/turtlebot3_navigation/maps/map_simu.pgm
+image: map_simu.pgm
 resolution: 0.050000
 origin: [-10.000000, -10.000000, 0.000000]
 negate: 0
