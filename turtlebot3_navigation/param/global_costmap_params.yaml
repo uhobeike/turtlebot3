@@ -8,4 +8,7 @@ global_costmap:
 
   static_map: true
   rolling_window: false
+
+  inflation_radius: 0.11 #多分確定
+  cost_scaling_factor: 0.55 #未確定
  

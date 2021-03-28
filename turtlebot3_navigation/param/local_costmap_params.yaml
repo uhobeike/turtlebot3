@@ -11,4 +11,7 @@ local_costmap:
   width: 3
   height: 3
   resolution: 0.01
+
+  inflation_radius: 0.01 #多分確定
+  cost_scaling_factor: 0.55 #未確定
   
