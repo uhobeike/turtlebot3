@@ -16,8 +16,8 @@ WaypointNav::WaypointNav(ros::NodeHandle& nodeHandle, std::string node_name, std
                         as_(nodeHandle, node_name, boost::bind(&WaypointNav::ExecuteCb, this, _1), false),
                         ac_("move_base", true),
                         node_name_(node_name),
-                        csv_fname_(file_name), waypoint_csv_index_(0), waypoint_rviz_index_(0), waypoint_index_(0),
-                        waypoint_csv_(0), amcl_pose_(4, 0),
+                        csv_fname_(file_name), waypoint_csv_index_(1), waypoint_rviz_index_(1), waypoint_index_(1),
+                        waypoint_csv_(1, vector<string>(5)), amcl_pose_(4, 0),
                         waypoint_area_threshold_(0.5), waypoint_area_check_(0.0),
                         NextWaypointMode_(true), GoalWaypointMode_(false), GoalReachedMode_(false), GoalReachedFlag_(false)
 {
@@ -57,7 +57,8 @@ void WaypointNav::WaypointCsvRead()
     while (getline(f_r, line)){
         istringstream stream(line);
         while (getline(stream, word, ',')){
-            waypoint_csv_[waypoint_csv_index_].push_back(word);
+
+            waypoint_csv_[waypoint_csv_index_ -1].push_back(word);
         }
 
         waypoint_csv_.resize(++waypoint_csv_index_);
@@ -69,31 +70,35 @@ void WaypointNav::WaypointRvizVisualization()
     geometry_msgs::PoseArray pose_array;
     geometry_msgs::Pose pose;
     uint8_t vec_cnt_index (0);
-    for (auto it_t = waypoint_csv_.begin(); it_t != waypoint_csv_.end(); ++it_t){
+    for (auto it_t = waypoint_csv_.begin()+1; it_t != waypoint_csv_.end(); ++it_t){
         vec_cnt_index = 0;
         for (auto it = (*it_t).begin(); it != (*it_t).end(); ++it){
             switch (vec_cnt_index){
-                case 1: 
+                case 0: 
                     pose.position.x = stod(*it);
+                    vec_cnt_index++;
                     continue;
-                case 2: 
+                case 1: 
                     pose.position.y = stod(*it);
+                    vec_cnt_index++;
                     continue;
-                
+
                     pose.position.z = 0.2;
                 
-                case 3: 
+                case 2: 
                     pose.orientation.z = stod(*it);
+                    vec_cnt_index++; 
                     continue;
-                case 4: 
+                case 3: 
                     pose.orientation.w = stod(*it);
+                    vec_cnt_index++;
                     break;
             }
-            vec_cnt_index++;
         }
         pose_array.poses.push_back(pose);
     }
-
+    pose_array.header.stamp = ros::Time::now(); 
+    pose_array.header.frame_id = "map";
     way_pose_array_.publish(pose_array);
 }
 
