@@ -15,7 +15,7 @@ WaypointNav::WaypointNav(ros::NodeHandle& nodeHandle, std::string node_name, std
                         nh_(nodeHandle),
                         as_(nodeHandle, node_name, boost::bind(&WaypointNav::ExecuteCb, this, _1), false),
                         ac_("move_base", true),
-                        node_name_(node_name_),
+                        node_name_(node_name),
                         csv_fname_(file_name), waypoint_csv_index_(0), waypoint_rviz_index_(0), waypoint_index_(0),
                         waypoint_csv_(0), amcl_pose_(4, 0),
                         waypoint_area_threshold_(0.5), waypoint_area_check_(0.0),
