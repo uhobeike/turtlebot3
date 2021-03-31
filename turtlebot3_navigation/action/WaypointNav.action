@@ -1,8 +1,9 @@
 #goal definition
-bool strat
+bool start
 bool stop
 ---
 #result definition
+bool test
 ---
 #feedback
-
+bool test
