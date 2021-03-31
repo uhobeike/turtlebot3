@@ -9,8 +9,9 @@ int main(int argc, char** argv)
 	ros::init(argc, argv, "WaypointNav");
 	ros::NodeHandle nh;
 
-	WaypointNav::WaypointNav wv(nh, ros::this_node::getName(), argv[1]);
-	ROS_INFO("%s: Please 'bbbbb' ", ros::this_node::getName().c_str());
+	waypoint_nav::WaypointNav wv(nh, ros::this_node::getName(), argv[1]);
+	ROS_INFO("%s: Please ' rostopic pub -1 /WaypointNav/goal turtlebot3_navigation/WaypointNavActionGoal ' ",
+			 ros::this_node::getName().c_str());
 	
 	ros::spin();
 	return 0;

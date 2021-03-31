@@ -14,7 +14,7 @@
 
 using namespace::std;
 
-namespace  WaypointNav {
+namespace waypoint_nav {
 
 class WaypointNav
 {
@@ -27,7 +27,7 @@ public:
     void GoalReachedCb(const actionlib_msgs::GoalStatusArray& status);
     void ExecuteCb(const turtlebot3_navigation::WaypointNavGoalConstPtr& goal);
 
-    void MoveBaseClient_Init();
+    void ActionClient_Init();
     void PubSub_Init();
 
     void WaypointCsvRead();
@@ -41,6 +41,8 @@ public:
     void ModeFlagOff();
     void Run();
 
+    void ModeDebug();
+
 private:
     ros::NodeHandle& nh_;
 
@@ -53,7 +55,6 @@ private:
 
     string csv_fname_;
     int waypoint_csv_index_;
-    int waypoint_rviz_index_;
     int waypoint_index_;
     vector<vector<string>> waypoint_csv_;
     vector<double> amcl_pose_;  
