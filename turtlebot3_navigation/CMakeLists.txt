@@ -13,18 +13,8 @@ find_package(catkin REQUIRED COMPONENTS
   std_msgs
   move_base_msgs
   tf
-)
-
-catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES goal_send
-   CATKIN_DEPENDS roscpp std_msgs
-#  DEPENDS system_lib
-#  CATKIN_DEPENDS roscpp std_msgs message_runtime
-)
-
-include_directories(
-  ${catkin_INCLUDE_DIRS}
+  actionlib_msgs
+  message_generation
 )
 
 ################################################################################
@@ -34,6 +24,16 @@ include_directories(
 ################################################################################
 # Declare ROS messages, services and actions
 ################################################################################
+add_action_files(
+  DIRECTORY action
+  FILES
+  WaypointNav.action
+)
+
+generate_messages(
+  DEPENDENCIES
+   actionlib_msgs
+)
 
 ################################################################################
 # Declare ROS dynamic reconfigure parameters
@@ -42,7 +42,17 @@ include_directories(
 ################################################################################
 # Declare catkin specific configuration to be passed to dependent projects
 ################################################################################
-catkin_package()
+catkin_package(
+  CATKIN_DEPENDS 
+   roscpp 
+   std_msgs
+   actionlib_msgs
+)
+
+include_directories(
+  include
+  ${catkin_INCLUDE_DIRS}
+)
 
 ################################################################################
 # Build
@@ -55,6 +65,15 @@ target_link_libraries(waypoint_rviz ${catkin_LIBRARIES})
 
 add_executable(start_order_waypoint_navigation src/start_order_waypoint_navigation.cpp)
 target_link_libraries(start_order_waypoint_navigation ${catkin_LIBRARIES})
+
+add_executable(WaypointNav_node
+  src/WaypointNav_node.cpp
+  src/WaypointNav.cpp
+)
+target_link_libraries(
+  WaypointNav_node
+  ${catkin_LIBRARIES}
+)
 ################################################################################
 # Install
 ################################################################################
