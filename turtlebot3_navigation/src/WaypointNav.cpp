@@ -152,11 +152,11 @@ void WaypointNav::WaypointInfoManagement()
         NextWaypointMode_ = true;
     }
     else if (waypoint_csv_[waypoint_index_][4] == "Goal"){
-        ModeFlagOff();
         GoalWaypointMode_ = true;
-        if (waypoint_index_ == waypoint_csv_index_ && GoalReachedFlag_) 
+        if (waypoint_index_ == waypoint_csv_index_ && GoalReachedFlag_ && WaypointAreaCheck()) 
             FinalGoalFlag_ = true;
-
+        if (waypoint_index_ == waypoint_csv_index_)
+            ModeFlagOff();
         if (FinalGoalFlag_){
             ROS_INFO("%s: Final Goal Reached", node_name_.c_str());
             ROS_INFO("%s: Please ' Ctl + c ' ",node_name_.c_str());
@@ -165,13 +165,12 @@ void WaypointNav::WaypointInfoManagement()
     else if (waypoint_csv_[waypoint_index_][4] == "GoalReach"){
         ModeFlagOff();
         GoalReachedMode_ = true;
-        GoalReachedFlag_ = false;
     }
 }
 
 bool WaypointNav::WaypointAreaCheck()
 {   
-    if (!GoalReachedMode_){
+    if (NextWaypointMode_){
         waypoint_area_check_ = 
             sqrt(pow( stod(waypoint_csv_[waypoint_index_][0]) - amcl_pose_[0], 2) 
                 + pow( stod(waypoint_csv_[waypoint_index_][1]) - amcl_pose_[1], 2));
@@ -184,7 +183,7 @@ bool WaypointNav::WaypointAreaCheck()
             return true;
         }
     }
-    else if (GoalReachedMode_){
+    else if (!NextWaypointMode_){
         waypoint_area_check_ = 
             sqrt(pow( stod(waypoint_csv_[waypoint_index_][0]) - amcl_pose_[0], 2) 
                 + pow( stod(waypoint_csv_[waypoint_index_][1]) - amcl_pose_[1], 2));
@@ -254,7 +253,7 @@ void WaypointNav::Run()
                 WaypointSet(goal_);
         }
         else if (GoalWaypointMode_)
-            WaypointSet(goal_);
+                WaypointSet(goal_);
         else if (GoalReachedMode_){
             if (WaypointAreaCheck() && GoalReachCheck())
                 WaypointSet(goal_);
