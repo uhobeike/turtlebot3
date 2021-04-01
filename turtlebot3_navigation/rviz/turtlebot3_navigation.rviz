@@ -328,6 +328,13 @@ Visualization Manager:
       Topic: /visualization_marker
       Unreliable: false
       Value: true
+    - Alpha: 1
+      Class: rviz/MarkerArray
+      Enabled: true
+      Name: Waypoint_Area
+      Marker Topic: /waypoint_area
+      Unreliable: false
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48

@@ -7,6 +7,7 @@
 #include <move_base_msgs/MoveBaseAction.h>
 #include <std_msgs/String.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <visualization_msgs/MarkerArray.h>
 
 #include <turtlebot3_navigation/WaypointNavAction.h>
 
@@ -32,6 +33,7 @@ public:
 
     void WaypointCsvRead();
     void WaypointRvizVisualization();
+    void WaypointMarkerArraySet(visualization_msgs::MarkerArray& waypoint_area, uint8_t index, uint8_t siz);
     void WaypointInfoManagement();
     bool WaypointAreaCheck();
     bool GoalReachCheck();
@@ -47,7 +49,7 @@ private:
     ros::NodeHandle& nh_;
 
     ros::Subscriber sub_goal_command_, sub_amcl_pose_, sub_movebase_goal_;
-    ros::Publisher ini_pose_, way_pose_array_;
+    ros::Publisher ini_pose_, way_pose_array_, way_area_array_;
     actionlib::SimpleActionServer<turtlebot3_navigation::WaypointNavAction> as_;
     actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> ac_;
 
