@@ -47,7 +47,9 @@ public:
 
     void WaypointCsvRead();
     void WaypointRvizVisualization();
-    void WaypointMarkerArraySet(visualization_msgs::MarkerArray& waypoint_area, uint8_t index, uint8_t siz);
+    void WaypointMarkerArraySet(visualization_msgs::MarkerArray& waypoint_area, 
+                                visualization_msgs::MarkerArray& waypoint_number_txt,
+                                uint8_t index, uint8_t siz);
     void WaypointInfoManagement();
     bool WaypointAreaCheck();
     bool GoalReachCheck();
@@ -63,7 +65,7 @@ private:
     ros::NodeHandle& nh_;
 
     ros::Subscriber sub_amcl_pose_, sub_movebase_goal_, sub_goal_command_;
-    ros::Publisher ini_pose_, way_pose_array_, way_area_array_;
+    ros::Publisher ini_pose_, way_pose_array_, way_area_array_, way_number_txt_array_;
     actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> ac_;
 
     string node_name_;

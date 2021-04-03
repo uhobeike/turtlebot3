@@ -26,7 +26,7 @@ int main(int argc, char** argv)
 	ros::NodeHandle nh;
 
 	waypoint_nav::WaypointNav wv(nh, ros::this_node::getName(), argv[1]);
-	ROS_INFO("%s: Please ' rostopic pub -1 /WaypointNav/goal turtlebot3_navigation/WaypointNavActionGoal ' ",
+	ROS_INFO("%s: Please ' rostopic pub  -1 /goal_command std_msgs/String go ' ",
 			 ros::this_node::getName().c_str());
 	ros::spin();
 	return 0;
