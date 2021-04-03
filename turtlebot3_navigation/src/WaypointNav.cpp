@@ -186,9 +186,7 @@ void WaypointNav::WaypointMarkerArraySet(visualization_msgs::MarkerArray& waypoi
     waypoint_number_txt.markers[index].color.b = 1.0f;
     waypoint_number_txt.markers[index].color.g = 1.0f;
     waypoint_number_txt.markers[index].color.r = 1.0f;
-    // waypoint_number_txt.markers[index].pose.orientation.z = 0;
-    // waypoint_number_txt.markers[index].pose.orientation.w = 1;
-
+    /*____________________________________________________________________________*/
 }
 
 void WaypointNav::WaypointInfoManagement()
@@ -228,7 +226,6 @@ bool WaypointNav::WaypointAreaCheck()
         if (waypoint_area_check_ <= waypoint_area_threshold_){
             ROS_INFO("%s: WayPoint Passing", node_name_.c_str());
             ROS_INFO("%s: Next Move Plan", node_name_.c_str());
-
             waypoint_index_++;
             return true;
         }
@@ -240,7 +237,6 @@ bool WaypointNav::WaypointAreaCheck()
 
         if (waypoint_area_check_ <= waypoint_area_threshold_){
             ROS_INFO("%s: Invade WayPoint Area ", node_name_.c_str());
-
             return true;
         }
     }
@@ -252,7 +248,6 @@ bool WaypointNav::GoalReachCheck()
     if (GoalReachedFlag_){
         ROS_INFO("%s: Goal Reached", node_name_.c_str());
         ROS_INFO("%s: Restart", node_name_.c_str());
-        
         waypoint_index_++;
         return true;
     }
@@ -283,13 +278,13 @@ void WaypointNav::ModeFlagOff()
 void WaypointNav::ModeFlagDebug()
 {
     cout << "___________________\n"
-         << "NextWaypointMode:"         << NextWaypointMode_ << "\n"
-         << "FinalGoalWaypointMode_:"   << FinalGoalWaypointMode_  << "\n"
-         << "ReStartWaypointMode_:"     << ReStartWaypointMode_  << "\n"
-         << "GoalReachedMode : "        << GoalReachedMode_  << "\n"
-         << "GoalReachedFlag_:"         << GoalReachedFlag_  << "\n"
+         << "NextWaypointMode:"         << NextWaypointMode_        << "\n"
+         << "FinalGoalWaypointMode_:"   << FinalGoalWaypointMode_   << "\n"
+         << "ReStartWaypointMode_:"     << ReStartWaypointMode_     << "\n"
+         << "GoalReachedMode : "        << GoalReachedMode_         << "\n"
+         << "GoalReachedFlag_:"         << GoalReachedFlag_         << "\n"
          << "~~~~~~~~~~~~~~~~~~~\n"
-         << "WaypointIndex   :"         << waypoint_index_   << "\n"
+         << "WaypointIndex   :"         << waypoint_index_          << "\n"
          << "___________________\n";
 }
 
