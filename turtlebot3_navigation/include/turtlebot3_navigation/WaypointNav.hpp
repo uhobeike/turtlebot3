@@ -1,8 +1,23 @@
+/*
+*Copyright 2021, uhobeike.
+*
+*Licensed under the Apache License, Version 2.0 (the "License");
+*you may not use this file except in compliance with the License.
+*You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+*Unless required by applicable law or agreed to in writing, software
+*distributed under the License is distributed on an "AS IS" BASIS,
+*WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*See the License for the specific language governing permissions and
+*limitations under the License.
+*/
+
 #ifndef WAYPOINT_NAV_
 #define WAYPOINT_NAV_
 
 #include <ros/ros.h>
-#include <actionlib/server/simple_action_server.h>
 #include <actionlib/client/simple_action_client.h>
 #include <move_base_msgs/MoveBaseAction.h>
 #include <std_msgs/String.h>
@@ -23,10 +38,9 @@ public:
     WaypointNav(ros::NodeHandle& nodeHandle, std::string name, std::string file_name);
     virtual ~WaypointNav();
 
-    void GoalCommandCb(const std_msgs::String& msg);
     void AmclPoseCb(const geometry_msgs::PoseWithCovarianceStamped& msg);
     void GoalReachedCb(const actionlib_msgs::GoalStatusArray& status);
-    void ExecuteCb(const turtlebot3_navigation::WaypointNavGoalConstPtr& goal);
+    void GoalCommandCb(const std_msgs::String& msg);
 
     void ActionClient_Init();
     void PubSub_Init();
@@ -43,14 +57,13 @@ public:
     void ModeFlagOff();
     void Run();
 
-    void ModeDebug();
+    void ModeFlagDebug();
 
 private:
     ros::NodeHandle& nh_;
 
-    ros::Subscriber sub_goal_command_, sub_amcl_pose_, sub_movebase_goal_;
+    ros::Subscriber sub_amcl_pose_, sub_movebase_goal_, sub_goal_command_;
     ros::Publisher ini_pose_, way_pose_array_, way_area_array_;
-    actionlib::SimpleActionServer<turtlebot3_navigation::WaypointNavAction> as_;
     actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> ac_;
 
     string node_name_;
@@ -67,12 +80,13 @@ private:
     move_base_msgs::MoveBaseGoal goal_;
 
     bool NextWaypointMode_;
-    bool GoalWaypointMode_;
+    bool FinalGoalWaypointMode_;
+    bool ReStartWaypointMode_;
     bool GoalReachedMode_;
     bool GoalReachedFlag_;
     bool FinalGoalFlag_;
-    bool RestartFlag_; 
-
+    bool ReStartFlag_; 
+    bool MsgReceiveFlag_;
 };
 
 } /* namespace */

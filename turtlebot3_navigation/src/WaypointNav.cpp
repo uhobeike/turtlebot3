@@ -1,3 +1,19 @@
+/*
+*Copyright 2021, uhobeike.
+*
+*Licensed under the Apache License, Version 2.0 (the "License");
+*you may not use this file except in compliance with the License.
+*You may obtain a copy of the License at
+*
+*    http://www.apache.org/licenses/LICENSE-2.0
+*
+*Unless required by applicable law or agreed to in writing, software
+*distributed under the License is distributed on an "AS IS" BASIS,
+*WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*See the License for the specific language governing permissions and
+*limitations under the License.
+*/
+
 #include <ros/ros.h>
 #include <geometry_msgs/PoseArray.h>
 
@@ -14,22 +30,19 @@ namespace  waypoint_nav {
 
 WaypointNav::WaypointNav(ros::NodeHandle& nodeHandle, std::string node_name, std::string file_name) :
                         nh_(nodeHandle),
-                        as_(nodeHandle, node_name, boost::bind(&WaypointNav::ExecuteCb, this, _1), false),
                         ac_("move_base", true),
                         node_name_(node_name),
                         csv_fname_(file_name), waypoint_csv_index_(1), waypoint_index_(0),
                         waypoint_csv_(1, vector<string>(0)), amcl_pose_(4, 0),
                         waypoint_area_threshold_(0.5), waypoint_area_check_(0.0),
-                        NextWaypointMode_(true), GoalWaypointMode_(false), GoalReachedMode_(false), 
-                        GoalReachedFlag_(false), FinalGoalFlag_(false)
+                        NextWaypointMode_(true), FinalGoalWaypointMode_(false), ReStartWaypointMode_(false), GoalReachedMode_(false), 
+                        GoalReachedFlag_(false), FinalGoalFlag_(false), ReStartFlag_(false), MsgReceiveFlag_(false)
 {
     PubSub_Init();
     ActionClient_Init();
 
     WaypointCsvRead();
     WaypointRvizVisualization();
-
-    as_.start();
 }
 
 WaypointNav::~WaypointNav() {}
@@ -38,6 +51,7 @@ void WaypointNav::PubSub_Init()
 {
     sub_amcl_pose_ = nh_.subscribe("amcl_pose", 1, &WaypointNav::AmclPoseCb, this);
     sub_movebase_goal_ = nh_.subscribe("move_base/status", 1, &WaypointNav::GoalReachedCb, this);
+    sub_goal_command_ = nh_.subscribe("goal_command", 1, &WaypointNav::GoalCommandCb, this);
 
     way_pose_array_ = nh_.advertise<geometry_msgs::PoseArray>("waypoint", 1, true);
     way_area_array_ = nh_.advertise<visualization_msgs::MarkerArray>("waypoint_area", 1, true);
@@ -152,7 +166,7 @@ void WaypointNav::WaypointInfoManagement()
         NextWaypointMode_ = true;
     }
     else if (waypoint_csv_[waypoint_index_][4] == "Goal"){
-        GoalWaypointMode_ = true;
+        FinalGoalWaypointMode_ = true;
         if (waypoint_index_ == waypoint_csv_index_ && GoalReachedFlag_ && WaypointAreaCheck()) 
             FinalGoalFlag_ = true;
         if (waypoint_index_ == waypoint_csv_index_)
@@ -161,6 +175,10 @@ void WaypointNav::WaypointInfoManagement()
             ROS_INFO("%s: Final Goal Reached", node_name_.c_str());
             ROS_INFO("%s: Please ' Ctl + c ' ",node_name_.c_str());
         }
+    }
+    else if (waypoint_csv_[waypoint_index_][4] == "GoalReStart"){
+        ModeFlagOff();
+        ReStartWaypointMode_ = true;
     }
     else if (waypoint_csv_[waypoint_index_][4] == "GoalReach"){
         ModeFlagOff();
@@ -223,20 +241,23 @@ void WaypointNav::WaypointSet(move_base_msgs::MoveBaseGoal& goal)
 void WaypointNav::ModeFlagOff()
 {
     NextWaypointMode_ = false;
-    GoalWaypointMode_ = false;
+    FinalGoalWaypointMode_ = false;
+    ReStartWaypointMode_ = false;
     GoalReachedMode_  = false;
     GoalReachedFlag_  = false;
+    ReStartFlag_ = false;
 }
 
-void WaypointNav::ModeDebug()
+void WaypointNav::ModeFlagDebug()
 {
     cout << "___________________\n"
-         << "NextWaypointMode:"   << NextWaypointMode_ << "\n"
-         << "GoalWaypointMode: "  << GoalWaypointMode_ << "\n"
-         << "GoalReachedMode : "  << GoalReachedMode_  << "\n"
-         << "GoalReachedFlag_:"   << GoalReachedFlag_  << "\n"
+         << "NextWaypointMode:"         << NextWaypointMode_ << "\n"
+         << "FinalGoalWaypointMode_:"   << FinalGoalWaypointMode_  << "\n"
+         << "ReStartWaypointMode_:"     << ReStartWaypointMode_  << "\n"
+         << "GoalReachedMode : "        << GoalReachedMode_  << "\n"
+         << "GoalReachedFlag_:"         << GoalReachedFlag_  << "\n"
          << "~~~~~~~~~~~~~~~~~~~\n"
-         << "WaypointIndex   :"   << waypoint_index_   << "\n"
+         << "WaypointIndex   :"         << waypoint_index_   << "\n"
          << "___________________\n";
 }
 
@@ -247,13 +268,17 @@ void WaypointNav::Run()
 
     ros::Rate loop_rate(5);
     while (ros::ok()){
-        ModeDebug();
+        ModeFlagDebug();
         if (NextWaypointMode_){
             if (WaypointAreaCheck())
                 WaypointSet(goal_);
         }
-        else if (GoalWaypointMode_)
+        else if (FinalGoalWaypointMode_)
                 WaypointSet(goal_);
+        else if (ReStartWaypointMode_){
+            if (ReStartFlag_)
+                WaypointSet(goal_);
+        }
         else if (GoalReachedMode_){
             if (WaypointAreaCheck() && GoalReachCheck())
                 WaypointSet(goal_);
@@ -282,11 +307,17 @@ void WaypointNav::GoalReachedCb(const actionlib_msgs::GoalStatusArray& status)
     }
 }
 
-void WaypointNav::ExecuteCb(const turtlebot3_navigation::WaypointNavGoalConstPtr& goal)
+void WaypointNav::GoalCommandCb(const std_msgs::String& msg)
 {
-    if (goal->start)
+    if (msg.data == "go" && !MsgReceiveFlag_){
+        MsgReceiveFlag_ = true;
         Run();
-    else if (goal->stop){
+    }
+    else if (msg.data == "go" && MsgReceiveFlag_){
+        ReStartFlag_ = true;
+        waypoint_index_++;
+    }
+    else if (msg.data == "q" && MsgReceiveFlag_){
         ROS_INFO("%s: Shutdown now ('o')/ bye bye~~~", node_name_.c_str());
         ros::shutdown();
     }
