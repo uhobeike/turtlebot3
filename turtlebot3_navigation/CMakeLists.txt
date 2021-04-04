@@ -66,12 +66,19 @@ target_link_libraries(waypoint_rviz ${catkin_LIBRARIES})
 add_executable(start_order_waypoint_navigation src/start_order_waypoint_navigation.cpp)
 target_link_libraries(start_order_waypoint_navigation ${catkin_LIBRARIES})
 
+add_library(WaypointNav
+  src/WaypointNav.cpp
+)
+add_dependencies(WaypointNav 
+  ${TARGET_NAME} 
+  ${PROJECT_NAME}_generate_messages_cpp
+)
 add_executable(WaypointNav_node
   src/WaypointNav_node.cpp
-  src/WaypointNav.cpp
 )
 target_link_libraries(
   WaypointNav_node
+  WaypointNav
   ${catkin_LIBRARIES}
 )
 ################################################################################
