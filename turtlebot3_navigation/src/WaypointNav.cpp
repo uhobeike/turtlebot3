@@ -278,13 +278,13 @@ void WaypointNav::ModeFlagOff()
 void WaypointNav::ModeFlagDebug()
 {
     cout << "___________________\n"
-         << "NextWaypointMode:"         << NextWaypointMode_        << "\n"
-         << "FinalGoalWaypointMode_:"   << FinalGoalWaypointMode_   << "\n"
-         << "ReStartWaypointMode_:"     << ReStartWaypointMode_     << "\n"
+         << "NextWaypointMode : "         << NextWaypointMode_        << "\n"
+         << "FinalGoalWaypointMode : "   << FinalGoalWaypointMode_   << "\n"
+         << "ReStartWaypointMode : "     << ReStartWaypointMode_     << "\n"
          << "GoalReachedMode : "        << GoalReachedMode_         << "\n"
-         << "GoalReachedFlag_:"         << GoalReachedFlag_         << "\n"
+         << "GoalReachedFlag : "         << GoalReachedFlag_         << "\n"
          << "~~~~~~~~~~~~~~~~~~~\n"
-         << "WaypointIndex   :"         << waypoint_index_          << "\n"
+         << "WaypointIndex   : "         << waypoint_index_          << "\n"
          << "___________________\n";
 }
 
