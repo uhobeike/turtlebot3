@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   move_base_msgs
   tf
   actionlib_msgs
+  costmap_dynamic_object_detecter
   message_generation
 )
 
@@ -47,6 +48,7 @@ catkin_package(
    roscpp 
    std_msgs
    actionlib_msgs
+   costmap_dynamic_object_detecter
 )
 
 include_directories(
@@ -81,6 +83,7 @@ target_link_libraries(
   WaypointNav
   ${catkin_LIBRARIES}
 )
+
 ################################################################################
 # Install
 ################################################################################
