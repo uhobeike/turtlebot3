@@ -14,7 +14,6 @@ find_package(catkin REQUIRED COMPONENTS
   move_base_msgs
   tf
   actionlib_msgs
-  costmap_dynamic_object_detecter
   message_generation
 )
 
@@ -28,7 +27,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_action_files(
   DIRECTORY action
   FILES
-  WaypointNav.action
+  ObstacleDetecte.action
 )
 
 generate_messages(
@@ -48,7 +47,6 @@ catkin_package(
    roscpp 
    std_msgs
    actionlib_msgs
-   costmap_dynamic_object_detecter
 )
 
 include_directories(
@@ -59,15 +57,15 @@ include_directories(
 ################################################################################
 # Build
 ################################################################################
-add_executable(waypoint_navigation src/waypoint_navigation.cpp)
-target_link_libraries(waypoint_navigation ${catkin_LIBRARIES})
+##waypoint_rviz 
+add_executable(waypoint_rviz 
+  src/waypoint_rviz_set.cpp
+)
+target_link_libraries(waypoint_rviz 
+  ${catkin_LIBRARIES}
+)
 
-add_executable(waypoint_rviz src/waypoint_rviz_set.cpp)
-target_link_libraries(waypoint_rviz ${catkin_LIBRARIES})
-
-add_executable(start_order_waypoint_navigation src/start_order_waypoint_navigation.cpp)
-target_link_libraries(start_order_waypoint_navigation ${catkin_LIBRARIES})
-
+##WaypointNav
 add_library(WaypointNav
   src/WaypointNav.cpp
 )
@@ -81,6 +79,19 @@ add_executable(WaypointNav_node
 target_link_libraries(
   WaypointNav_node
   WaypointNav
+  ${catkin_LIBRARIES}
+)
+
+##ObstacleDetecte
+add_executable(ObstacleDetecte
+  src/ObstacleDetecte.cpp
+)
+add_dependencies(ObstacleDetecte
+  ${TARGET_NAME} 
+  ${PROJECT_NAME}_generate_messages_cpp
+)
+target_link_libraries(
+  ObstacleDetecte
   ${catkin_LIBRARIES}
 )
 
