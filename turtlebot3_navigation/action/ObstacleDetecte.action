@@ -1,0 +1,8 @@
+#goal definition
+bool order
+---
+#result defenition
+bool observation_results
+---
+#feedback
+uint32 sensor_data
