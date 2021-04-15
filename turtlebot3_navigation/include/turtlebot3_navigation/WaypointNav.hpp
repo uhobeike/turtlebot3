@@ -24,7 +24,7 @@
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <visualization_msgs/MarkerArray.h>
 
-#include <turtlebot3_navigation/WaypointNavAction.h>
+#include <turtlebot3_navigation/ObstacleDetecteAction.h>
 
 #include <vector>
 
@@ -53,6 +53,7 @@ public:
     void WaypointInfoManagement();
     bool WaypointAreaCheck();
     bool GoalReachCheck();
+    bool ObjectDetectCheck();
 
     void WaypointSet(move_base_msgs::MoveBaseGoal& next);
 
@@ -66,7 +67,10 @@ private:
 
     ros::Subscriber sub_amcl_pose_, sub_movebase_goal_, sub_goal_command_;
     ros::Publisher ini_pose_, way_pose_array_, way_area_array_, way_number_txt_array_;
-    actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> ac_;
+    actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> ac_move_base_;
+    actionlib::SimpleActionClient<turtlebot3_navigation::ObstacleDetecteAction> ac_scan_diff_;
+
+    turtlebot3_navigation::ObstacleDetecteActionGoal scan_diff_;
 
     string node_name_;
 
@@ -85,10 +89,14 @@ private:
     bool FinalGoalWaypointMode_;
     bool ReStartWaypointMode_;
     bool GoalReachedMode_;
-    bool GoalReachedFlag_;
+    bool ObjectDetecterMode_;
+
     bool FinalGoalFlag_;
     bool ReStartFlag_; 
     bool MsgReceiveFlag_;
+    bool GoalReachedFlag_;
+    bool ObjectDetectInitFlag_;
+    bool ObjectDetectedFlag_;
 };
 
 } /* namespace */

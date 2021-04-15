@@ -30,13 +30,16 @@ namespace  waypoint_nav {
 
 WaypointNav::WaypointNav(ros::NodeHandle& nodeHandle, std::string node_name, std::string file_name) :
                         nh_(nodeHandle),
-                        ac_("move_base", true),
+                        ac_move_base_("move_base", true),
+                        ac_scan_diff_("obs_detecte", true),
                         node_name_(node_name),
                         csv_fname_(file_name), waypoint_csv_index_(1), waypoint_index_(0),
                         waypoint_csv_(1, vector<string>(0)), amcl_pose_(4, 0),
                         waypoint_area_threshold_(0.5), waypoint_area_check_(0.0),
-                        NextWaypointMode_(true), FinalGoalWaypointMode_(false), ReStartWaypointMode_(false), GoalReachedMode_(false), 
-                        GoalReachedFlag_(false), FinalGoalFlag_(false), ReStartFlag_(false), MsgReceiveFlag_(false)
+                        NextWaypointMode_(true), FinalGoalWaypointMode_(false), ReStartWaypointMode_(false), 
+                        GoalReachedMode_(false), ObjectDetecterMode_(false), 
+                        GoalReachedFlag_(false), FinalGoalFlag_(false), ReStartFlag_(false), 
+                        MsgReceiveFlag_(false), ObjectDetectInitFlag_(false), ObjectDetectedFlag_(false)
 {
     PubSub_Init();
     ActionClient_Init();
@@ -60,11 +63,17 @@ void WaypointNav::PubSub_Init()
 
 void WaypointNav::ActionClient_Init()
 {
-    while (!ac_.waitForServer(ros::Duration(10.0))){
-        ROS_INFO("Waiting for the move_base action server to come up");
+    while (!ac_move_base_.waitForServer(ros::Duration(10.0))){
+        ROS_ERROR("Waiting for the move_base action server to come up");
         exit(0);
     }
     ROS_INFO("MoveBase server comes up");
+
+    while (!ac_scan_diff_.waitForServer(ros::Duration(10.0))){
+        ROS_ERROR("Waiting for the obs_detecte action server to come up");
+        exit(0);
+    }
+    ROS_INFO("ObsDetecte server comes up");
 }
 
 void WaypointNav::WaypointCsvRead()
@@ -172,7 +181,7 @@ void WaypointNav::WaypointMarkerArraySet(visualization_msgs::MarkerArray& waypoi
     waypoint_area.markers[index].pose.orientation.w = 1;
     /*______________________________________________________________________*/
 
-    /*waypoint_number_txt_________________________________________________________*/
+    /*waypoint_number_txt________________________________________________________________*/
     waypoint_number_txt.markers[index].header.frame_id = "map";
     waypoint_number_txt.markers[index].header.stamp = ros::Time::now();
     waypoint_number_txt.markers[index].id = index;
@@ -186,7 +195,7 @@ void WaypointNav::WaypointMarkerArraySet(visualization_msgs::MarkerArray& waypoi
     waypoint_number_txt.markers[index].color.b = 1.0f;
     waypoint_number_txt.markers[index].color.g = 1.0f;
     waypoint_number_txt.markers[index].color.r = 1.0f;
-    /*____________________________________________________________________________*/
+    /*___________________________________________________________________________________*/
 }
 
 void WaypointNav::WaypointInfoManagement()
@@ -213,6 +222,10 @@ void WaypointNav::WaypointInfoManagement()
     else if (waypoint_csv_[waypoint_index_][4] == "GoalReach"){
         ModeFlagOff();
         GoalReachedMode_ = true;
+    }
+    else if (waypoint_csv_[waypoint_index_][4] == "ObjectDetect"){
+        ModeFlagOff();
+        ObjectDetecterMode_ = true;
     }
 }
 
@@ -254,6 +267,20 @@ bool WaypointNav::GoalReachCheck()
     return false;
 }
 
+bool WaypointNav::ObjectDetectCheck()
+{
+    scan_diff_.goal.order = true;
+    if (!ObjectDetectInitFlag_)
+        ac_scan_diff_.sendGoal(scan_diff_.goal);
+    ObjectDetectInitFlag_ = true;
+    if (ac_scan_diff_.waitForResult()){
+        ObjectDetectInitFlag_ = false;
+        ObjectDetectedFlag_ = true;
+        return true;
+    }
+    return false;
+}
+
 void WaypointNav::WaypointSet(move_base_msgs::MoveBaseGoal& goal)
 {
     goal.target_pose.pose.position.x    = stod(waypoint_csv_[waypoint_index_][0]);
@@ -262,29 +289,34 @@ void WaypointNav::WaypointSet(move_base_msgs::MoveBaseGoal& goal)
     goal.target_pose.pose.orientation.w = stod(waypoint_csv_[waypoint_index_][3]);
     goal.target_pose.header.stamp       = ros::Time::now();
 
-    ac_.sendGoal(goal);
+    ac_move_base_.sendGoal(goal);
 }
 
 void WaypointNav::ModeFlagOff()
 {
-    NextWaypointMode_ = false;
-    FinalGoalWaypointMode_ = false;
-    ReStartWaypointMode_ = false;
-    GoalReachedMode_  = false;
-    GoalReachedFlag_  = false;
-    ReStartFlag_ = false;
+    NextWaypointMode_       = false;
+    FinalGoalWaypointMode_  = false;
+    ReStartWaypointMode_    = false;
+    GoalReachedMode_        = false;
+    ObjectDetecterMode_     = false;
+
+    GoalReachedFlag_        = false;
+    ReStartFlag_            = false;
+    ObjectDetectedFlag_     = false;
 }
 
 void WaypointNav::ModeFlagDebug()
 {
     cout << "___________________\n"
-         << "NextWaypointMode : "         << NextWaypointMode_        << "\n"
-         << "FinalGoalWaypointMode : "   << FinalGoalWaypointMode_   << "\n"
-         << "ReStartWaypointMode : "     << ReStartWaypointMode_     << "\n"
-         << "GoalReachedMode : "        << GoalReachedMode_         << "\n"
-         << "GoalReachedFlag : "         << GoalReachedFlag_         << "\n"
+         << "NextWaypointMode : "       << NextWaypointMode_                << "\n"
+         << "FinalGoalWaypointMode : "  << FinalGoalWaypointMode_           << "\n"
+         << "ReStartWaypointMode : "    << ReStartWaypointMode_             << "\n"
+         << "GoalReachedMode : "        << GoalReachedMode_                 << "\n"
+         << "GoalReachedFlag : "        << GoalReachedFlag_                 << "\n"
+         << "ObjectDetecterMode : "     << ObjectDetecterMode_              << "\n"
+         << "ObjectDetectFlag : "       << ObjectDetectedFlag_              << "\n"
          << "~~~~~~~~~~~~~~~~~~~\n"
-         << "WaypointIndex   : "         << waypoint_index_          << "\n"
+         << "WaypointIndex   : "        << waypoint_index_          << "\n"
          << "___________________\n";
 }
 
@@ -295,7 +327,6 @@ void WaypointNav::Run()
 
     ros::Rate loop_rate(5);
     while (ros::ok()){
-        ModeFlagDebug();
         if (NextWaypointMode_){
             if (WaypointAreaCheck())
                 WaypointSet(goal_);
@@ -310,6 +341,12 @@ void WaypointNav::Run()
             if (WaypointAreaCheck() && GoalReachCheck())
                 WaypointSet(goal_);
         }
+        else if (ObjectDetecterMode_){
+            if (WaypointAreaCheck() && GoalReachCheck())
+                if (ObjectDetectCheck())
+                    WaypointSet(goal_);
+        }
+        ModeFlagDebug();
         WaypointInfoManagement();
         ros::spinOnce();
         loop_rate.sleep();
@@ -346,6 +383,8 @@ void WaypointNav::GoalCommandCb(const std_msgs::String& msg)
     }
     else if (msg.data == "q" && MsgReceiveFlag_){
         ROS_INFO("%s: Shutdown now ('o')/ bye bye~~~", node_name_.c_str());
+        scan_diff_.goal.order = false;
+        ac_scan_diff_.sendGoal(scan_diff_.goal);
         ros::shutdown();
     }
 }
