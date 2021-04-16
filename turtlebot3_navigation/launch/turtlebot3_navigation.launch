@@ -24,8 +24,7 @@
   </include>
 
   <!-- node launch -->     
-  <node pkg="turtlebot3_navigation" name="ObstacleDetecte" type="ObstacleDetecte" output="screen"/>
-  <node pkg="turtlebot3_navigation" name="WaypointNav_node" type="WaypointNav_node" args="$(arg csv_file)" output="screen"/>
+  <!-- <node pkg="turtlebot3_navigation" name="WaypointNav_AWS_node" type="WaypointNav_AWS_node" args="$(arg csv_file)" output="screen"/> -->
 
   <!-- rviz -->
   <group if="$(arg open_rviz)"> 

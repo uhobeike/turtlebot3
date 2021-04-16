@@ -98,8 +98,8 @@ private:
     bool ReStartFlag_; 
     bool MsgReceiveFlag_;
     bool GoalReachedFlag_;
-    bool LeftCourceFlag_;
-    bool RightCourceFlag_;
+    bool LeftCourseFlag_;
+    bool RightCourseFlag_;
 };
 
 } /* namespace */

@@ -39,7 +39,7 @@ WaypointNav::WaypointNav(ros::NodeHandle& nodeHandle, std::string node_name, std
                         GoalReachedMode_(false), LeftRightCourseSelectMode_(false),
                         ForcedNextWaypointMode_(false), ForcedPrevWaypointMode_(false), ReturnToInitialPositionMode_(false),
                         GoalReachedFlag_(false), FinalGoalFlag_(false), ReStartFlag_(false), 
-                        MsgReceiveFlag_(false), LeftCourceFlag_(false), RightCourceFlag_(false)
+                        MsgReceiveFlag_(false), LeftCourseFlag_(false), RightCourseFlag_(false)
 {
     PubSub_Init();
     ActionClient_Init();
@@ -298,31 +298,33 @@ void WaypointNav::WaypointInitSet(move_base_msgs::MoveBaseGoal& init)
 void WaypointNav::WaypointCourseSelectSet(move_base_msgs::MoveBaseGoal& course, uint& waypoint_index)
 {
     uint index_cnt(0);
-    if (LeftCourceFlag_){
+    if (LeftCourseFlag_){
         for_each(waypoint_csv_.begin(), waypoint_csv_.end(), [&waypoint_index, &course, &index_cnt](vector<string>& vec) {
             for_each(vec.begin(), vec.end(), [&vec, &waypoint_index, &course, &index_cnt](string& mode) {
-                if (mode == "LeftCource"){
+                if (mode == "LeftCourse"){
                     course.target_pose.pose.position.x    = stod(vec[0]);
                     course.target_pose.pose.position.y    = stod(vec[1]);
                     course.target_pose.pose.orientation.z = stod(vec[2]);
                     course.target_pose.pose.orientation.w = stod(vec[3]);
-                    vec.erase(vec.end());
+                    if (vec.size() == 5)
+                        vec.erase(vec.end());
                     waypoint_index = index_cnt;
                 }
             });
             index_cnt++;
         });
     }
-    else if (RightCourceFlag_){
+    else if (RightCourseFlag_){
         uint index_cnt(0);
         for_each(waypoint_csv_.begin(), waypoint_csv_.end(), [&waypoint_index, &course, &index_cnt](vector<string>& vec) {
             for_each(vec.begin(), vec.end(), [&vec, &waypoint_index, &course, &index_cnt](string& mode) {
-                if (mode == "RightCource"){
+                if (mode == "RightCourse"){
                     course.target_pose.pose.position.x    = stod(vec[0]);
                     course.target_pose.pose.position.y    = stod(vec[1]);
                     course.target_pose.pose.orientation.z = stod(vec[2]);
                     course.target_pose.pose.orientation.w = stod(vec[3]);
-                    vec.erase(vec.end());
+                    if (vec.size() == 5)
+                        vec.erase(vec.end());
                     waypoint_index = index_cnt;
                 }
             });
@@ -342,8 +344,8 @@ void WaypointNav::ModeFlagOff()
 
     GoalReachedFlag_        = false;
     ReStartFlag_            = false;
-    LeftCourceFlag_ = false;
-    RightCourceFlag_ = false; 
+    LeftCourseFlag_ = false;
+    RightCourseFlag_ = false; 
 }
 
 void WaypointNav::ModeFlagDebug()
@@ -382,7 +384,7 @@ void WaypointNav::Run()
                     WaypointNextSet(goal_);
             }
             else if (LeftRightCourseSelectMode_){
-                if (LeftCourceFlag_ || RightCourceFlag_){
+                if (LeftCourseFlag_ || RightCourseFlag_){
                     WaypointCourseSelectSet(goal_, waypoint_index_);
                 }
             }
@@ -446,9 +448,9 @@ void WaypointNav::GoalCommandCb(const std_msgs::String& msg)
     else if (msg.data == "init" && MsgReceiveFlag_)
         ReturnToInitialPositionMode_ = true;
     else if (msg.data == "left" && MsgReceiveFlag_)
-        LeftCourceFlag_ = true;
+        LeftCourseFlag_ = true;
     else if (msg.data == "right" && MsgReceiveFlag_)
-        RightCourceFlag_ = true;
+        RightCourseFlag_ = true;
 }
 
 } /* namespace */
