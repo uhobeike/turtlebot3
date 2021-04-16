@@ -65,33 +65,20 @@ target_link_libraries(waypoint_rviz
   ${catkin_LIBRARIES}
 )
 
-##WaypointNav
-add_library(WaypointNav
-  src/WaypointNav.cpp
+##WaypointNav_AWS
+add_library(WaypointNav_AWS
+  src/WaypointNav_AWS.cpp
 )
-add_dependencies(WaypointNav 
+add_dependencies(WaypointNav_AWS 
   ${TARGET_NAME} 
   ${PROJECT_NAME}_generate_messages_cpp
 )
-add_executable(WaypointNav_node
-  src/WaypointNav_node.cpp
+add_executable(WaypointNav_AWS_node
+  src/WaypointNav_AWS_node.cpp
 )
 target_link_libraries(
-  WaypointNav_node
-  WaypointNav
-  ${catkin_LIBRARIES}
-)
-
-##ObstacleDetecte
-add_executable(ObstacleDetecte
-  src/ObstacleDetecte.cpp
-)
-add_dependencies(ObstacleDetecte
-  ${TARGET_NAME} 
-  ${PROJECT_NAME}_generate_messages_cpp
-)
-target_link_libraries(
-  ObstacleDetecte
+  WaypointNav_AWS_node
+  WaypointNav_AWS
   ${catkin_LIBRARIES}
 )
 
