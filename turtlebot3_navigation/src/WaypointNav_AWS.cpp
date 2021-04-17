@@ -221,6 +221,10 @@ void WaypointNav::WaypointInfoManagement()
         ModeFlagOff();
         LeftRightCourseSelectMode_ = true;
     }
+    else if (waypoint_csv_[waypoint_index_][4] == "LeftCourse" || waypoint_csv_[waypoint_index_][4] == "RightCourse"){
+        ModeFlagOff();
+        NextWaypointMode_ = true;
+    }
 }
 
 bool WaypointNav::WaypointAreaCheck()
@@ -261,8 +265,20 @@ bool WaypointNav::GoalReachCheck()
     return false;
 }
 
+void WaypointNav::WaypointSet(move_base_msgs::MoveBaseGoal& current)
+{
+    current.target_pose.pose.position.x    = stod(waypoint_csv_[waypoint_index_][0]);
+    current.target_pose.pose.position.y    = stod(waypoint_csv_[waypoint_index_][1]);
+    current.target_pose.pose.orientation.z = stod(waypoint_csv_[waypoint_index_][2]);
+    current.target_pose.pose.orientation.w = stod(waypoint_csv_[waypoint_index_][3]);
+    current.target_pose.header.stamp       = ros::Time::now();
+
+    ac_move_base_.sendGoal(current);
+}
+
 void WaypointNav::WaypointNextSet(move_base_msgs::MoveBaseGoal& next)
 {
+    (waypoint_index_ == waypoint_csv_.size()) ? (waypoint_index_ = waypoint_csv_.size() - 1):(waypoint_index_++);
     next.target_pose.pose.position.x    = stod(waypoint_csv_[waypoint_index_][0]);
     next.target_pose.pose.position.y    = stod(waypoint_csv_[waypoint_index_][1]);
     next.target_pose.pose.orientation.z = stod(waypoint_csv_[waypoint_index_][2]);
@@ -306,8 +322,6 @@ void WaypointNav::WaypointCourseSelectSet(move_base_msgs::MoveBaseGoal& course, 
                     course.target_pose.pose.position.y    = stod(vec[1]);
                     course.target_pose.pose.orientation.z = stod(vec[2]);
                     course.target_pose.pose.orientation.w = stod(vec[3]);
-                    if (vec.size() == 5)
-                        vec.erase(vec.end());
                     waypoint_index = index_cnt;
                 }
             });
@@ -323,8 +337,6 @@ void WaypointNav::WaypointCourseSelectSet(move_base_msgs::MoveBaseGoal& course, 
                     course.target_pose.pose.position.y    = stod(vec[1]);
                     course.target_pose.pose.orientation.z = stod(vec[2]);
                     course.target_pose.pose.orientation.w = stod(vec[3]);
-                    if (vec.size() == 5)
-                        vec.erase(vec.end());
                     waypoint_index = index_cnt;
                 }
             });
@@ -364,24 +376,24 @@ void WaypointNav::ModeFlagDebug()
 void WaypointNav::Run()
 {
     goal_.target_pose.header.frame_id = "map"; 
-    WaypointNextSet(goal_);
+    WaypointSet(goal_);
 
     ros::Rate loop_rate(5);
     while (ros::ok()){
         if (!ForcedNextWaypointMode_ && !ForcedPrevWaypointMode_ && !ReturnToInitialPositionMode_){
             if (NextWaypointMode_){
                 if (WaypointAreaCheck())
-                    WaypointNextSet(goal_);
+                    WaypointSet(goal_);
             }
             else if (FinalGoalWaypointMode_)
-                    WaypointNextSet(goal_);
+                    WaypointSet(goal_);
             else if (ReStartWaypointMode_){
                 if (ReStartFlag_)
-                    WaypointNextSet(goal_);
+                    WaypointSet(goal_);
             }
             else if (GoalReachedMode_){
                 if (WaypointAreaCheck() && GoalReachCheck())
-                    WaypointNextSet(goal_);
+                    WaypointSet(goal_);
             }
             else if (LeftRightCourseSelectMode_){
                 if (LeftCourseFlag_ || RightCourseFlag_){

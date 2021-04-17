@@ -53,8 +53,7 @@ public:
     bool GoalReachCheck();
     bool ObjectDetectCheck();
 
-    void WaypointSet(move_base_msgs::MoveBaseGoal& next);
-
+    void WaypointSet(move_base_msgs::MoveBaseGoal& current);
     void WaypointNextSet(move_base_msgs::MoveBaseGoal& next);
     void WaypointPrevSet(move_base_msgs::MoveBaseGoal& prev);
     void WaypointInitSet(move_base_msgs::MoveBaseGoal& init);
