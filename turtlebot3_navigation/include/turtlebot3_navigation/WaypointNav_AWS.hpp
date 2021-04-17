@@ -25,6 +25,7 @@
 #include <visualization_msgs/MarkerArray.h>
 
 #include <vector>
+#include <thread>
 
 using namespace::std;
 
@@ -83,6 +84,7 @@ private:
     float waypoint_area_check_;
 
     move_base_msgs::MoveBaseGoal goal_;
+    thread th;
 
     bool NextWaypointMode_;
     bool FinalGoalWaypointMode_;
@@ -92,6 +94,7 @@ private:
     bool ForcedPrevWaypointMode_;
     bool ReturnToInitialPositionMode_;
     bool LeftRightCourseSelectMode_;
+    bool FreeSelectWaypointMode_;
 
     bool FinalGoalFlag_;
     bool ReStartFlag_; 
@@ -101,6 +104,7 @@ private:
     bool RightCourseFlag_;
     bool ActionRestartFlag_;
     bool ActionCancelFlag_;
+    bool FreeSelectWaypointFlag_;
 };
 
 } /* namespace */

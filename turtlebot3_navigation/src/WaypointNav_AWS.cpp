@@ -35,12 +35,15 @@ WaypointNav::WaypointNav(ros::NodeHandle& nodeHandle, std::string node_name, std
                         csv_fname_(file_name), waypoint_csv_index_(1), waypoint_index_(0),
                         waypoint_csv_(1, vector<string>(0)), amcl_pose_(4, 0),
                         waypoint_area_threshold_(0.5), waypoint_area_check_(0.0),
+                        //Mode
                         NextWaypointMode_(true), FinalGoalWaypointMode_(false), ReStartWaypointMode_(false), 
                         GoalReachedMode_(false), LeftRightCourseSelectMode_(false),
-                        ForcedNextWaypointMode_(false), ForcedPrevWaypointMode_(false), ReturnToInitialPositionMode_(false),
+                        ForcedNextWaypointMode_(false), ForcedPrevWaypointMode_(false), 
+                        ReturnToInitialPositionMode_(false), FreeSelectWaypointMode_(false),
+                        //Flag
                         GoalReachedFlag_(false), FinalGoalFlag_(false), ReStartFlag_(false), 
                         MsgReceiveFlag_(false), LeftCourseFlag_(false), RightCourseFlag_(false), 
-                        ActionRestartFlag_(false), ActionCancelFlag_(false)
+                        ActionRestartFlag_(false), ActionCancelFlag_(false), FreeSelectWaypointFlag_(false)
 {
     PubSub_Init();
     ActionClient_Init();
@@ -49,7 +52,10 @@ WaypointNav::WaypointNav(ros::NodeHandle& nodeHandle, std::string node_name, std
     WaypointRvizVisualization();
 }
 
-WaypointNav::~WaypointNav() {}
+WaypointNav::~WaypointNav()
+{
+    th.join();
+}
 
 void WaypointNav::PubSub_Init()
 {
@@ -382,7 +388,7 @@ void WaypointNav::Run()
     ros::Rate loop_rate(5);
     while (ros::ok()){
         if (!ActionCancelFlag_){
-            if (!ForcedNextWaypointMode_ && !ForcedPrevWaypointMode_ && !ReturnToInitialPositionMode_){
+            if (!ForcedNextWaypointMode_ && !ForcedPrevWaypointMode_ && !ReturnToInitialPositionMode_ && !FreeSelectWaypointMode_){
                 if (NextWaypointMode_){
                     if (WaypointAreaCheck())
                         WaypointSet(goal_);
@@ -418,13 +424,55 @@ void WaypointNav::Run()
                 WaypointInitSet(goal_);
                 ReturnToInitialPositionMode_ = false;
             }
+            else if (FreeSelectWaypointMode_){
+                bool IndexCinFlag = false;
+                uint free_select_waypoint_index = 0;
+                if (!FreeSelectWaypointFlag_){
+                    FreeSelectWaypointFlag_ = true;
+                    th = thread([&free_select_waypoint_index, &IndexCinFlag](){
+                        cin >> free_select_waypoint_index;
+                        IndexCinFlag = true;
+                    });
+                    th.join();
+                }
+                if (FreeSelectWaypointFlag_){
+                    if (IndexCinFlag){
+                        ((free_select_waypoint_index >= waypoint_csv_.size()) || free_select_waypoint_index <= 0) 
+                            ? (waypoint_index_):(waypoint_index_ = free_select_waypoint_index);
+                        FreeSelectWaypointMode_ = false;
+                        FreeSelectWaypointFlag_ = false;
+                    }
+                }
+            }
         }
         else if (ActionRestartFlag_){
+            ActionRestartFlag_ = false;
             ActionCancelFlag_ = false;
             WaypointSet(goal_);
         }
-        else if (ActionCancelFlag_)
+        else if (ActionCancelFlag_){
             ac_move_base_.cancelAllGoals();
+            if (FreeSelectWaypointMode_){
+                bool IndexCinFlag = false;
+                uint free_select_waypoint_index = 0;
+                if (!FreeSelectWaypointFlag_){
+                    FreeSelectWaypointFlag_ = true;
+                    th = thread([&free_select_waypoint_index, &IndexCinFlag](){
+                        cin >> free_select_waypoint_index;
+                        IndexCinFlag = true;
+                    });
+                    th.join();
+                }
+                if (FreeSelectWaypointFlag_){
+                    if (IndexCinFlag){
+                        ((free_select_waypoint_index >= waypoint_csv_.size()) || free_select_waypoint_index <= 0) 
+                            ? (waypoint_index_):(waypoint_index_ = free_select_waypoint_index);
+                        FreeSelectWaypointMode_ = false;
+                        FreeSelectWaypointFlag_ = false;
+                    }
+                }
+            }
+        }
         ros::spinOnce();
         loop_rate.sleep();
     }
@@ -476,6 +524,8 @@ void WaypointNav::GoalCommandCb(const std_msgs::String& msg)
         ActionRestartFlag_ = true;
     else if (msg.data == "accan" && MsgReceiveFlag_)
         ActionCancelFlag_ = true;
+    else if (msg.data == "frnum" && MsgReceiveFlag_)
+        FreeSelectWaypointMode_ = true;
 }
 
 } /* namespace */
