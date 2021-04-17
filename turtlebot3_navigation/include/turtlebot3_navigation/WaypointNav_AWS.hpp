@@ -99,6 +99,8 @@ private:
     bool GoalReachedFlag_;
     bool LeftCourseFlag_;
     bool RightCourseFlag_;
+    bool ActionRestartFlag_;
+    bool ActionCancelFlag_;
 };
 
 } /* namespace */

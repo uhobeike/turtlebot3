@@ -39,7 +39,8 @@ WaypointNav::WaypointNav(ros::NodeHandle& nodeHandle, std::string node_name, std
                         GoalReachedMode_(false), LeftRightCourseSelectMode_(false),
                         ForcedNextWaypointMode_(false), ForcedPrevWaypointMode_(false), ReturnToInitialPositionMode_(false),
                         GoalReachedFlag_(false), FinalGoalFlag_(false), ReStartFlag_(false), 
-                        MsgReceiveFlag_(false), LeftCourseFlag_(false), RightCourseFlag_(false)
+                        MsgReceiveFlag_(false), LeftCourseFlag_(false), RightCourseFlag_(false), 
+                        ActionRestartFlag_(false), ActionCancelFlag_(false)
 {
     PubSub_Init();
     ActionClient_Init();
@@ -380,42 +381,50 @@ void WaypointNav::Run()
 
     ros::Rate loop_rate(5);
     while (ros::ok()){
-        if (!ForcedNextWaypointMode_ && !ForcedPrevWaypointMode_ && !ReturnToInitialPositionMode_){
-            if (NextWaypointMode_){
-                if (WaypointAreaCheck())
-                    WaypointSet(goal_);
-            }
-            else if (FinalGoalWaypointMode_)
-                    WaypointSet(goal_);
-            else if (ReStartWaypointMode_){
-                if (ReStartFlag_)
-                    WaypointSet(goal_);
-            }
-            else if (GoalReachedMode_){
-                if (WaypointAreaCheck() && GoalReachCheck())
-                    WaypointSet(goal_);
-            }
-            else if (LeftRightCourseSelectMode_){
-                if (LeftCourseFlag_ || RightCourseFlag_){
-                    WaypointCourseSelectSet(goal_, waypoint_index_);
+        if (!ActionCancelFlag_){
+            if (!ForcedNextWaypointMode_ && !ForcedPrevWaypointMode_ && !ReturnToInitialPositionMode_){
+                if (NextWaypointMode_){
+                    if (WaypointAreaCheck())
+                        WaypointSet(goal_);
                 }
+                else if (FinalGoalWaypointMode_)
+                        WaypointSet(goal_);
+                else if (ReStartWaypointMode_){
+                    if (ReStartFlag_)
+                        WaypointSet(goal_);
+                }
+                else if (GoalReachedMode_){
+                    if (WaypointAreaCheck() && GoalReachCheck())
+                        WaypointSet(goal_);
+                }
+                else if (LeftRightCourseSelectMode_){
+                    if (LeftCourseFlag_ || RightCourseFlag_){
+                        WaypointCourseSelectSet(goal_, waypoint_index_);
+                    }
+                }
+                ModeFlagDebug();
+                WaypointInfoManagement();
             }
-            ModeFlagDebug();
-            WaypointInfoManagement();
+            else if (ForcedNextWaypointMode_){
+                waypoint_index_++;
+                WaypointNextSet(goal_);
+                ForcedNextWaypointMode_ = false;
+            }
+            else if (ForcedPrevWaypointMode_){
+                WaypointPrevSet(goal_);
+                ForcedPrevWaypointMode_ = false;
+            }
+            else if (ReturnToInitialPositionMode_){
+                WaypointInitSet(goal_);
+                ReturnToInitialPositionMode_ = false;
+            }
         }
-        else if (ForcedNextWaypointMode_){
-            waypoint_index_++;
-            WaypointNextSet(goal_);
-            ForcedNextWaypointMode_ = false;
+        else if (ActionRestartFlag_){
+            ActionCancelFlag_ = false;
+            WaypointSet(goal_);
         }
-        else if (ForcedPrevWaypointMode_){
-            WaypointPrevSet(goal_);
-            ForcedPrevWaypointMode_ = false;
-        }
-        else if (ReturnToInitialPositionMode_){
-            WaypointInitSet(goal_);
-            ReturnToInitialPositionMode_ = false;
-        }
+        else if (ActionCancelFlag_)
+            ac_move_base_.cancelAllGoals();
         ros::spinOnce();
         loop_rate.sleep();
     }
@@ -463,6 +472,10 @@ void WaypointNav::GoalCommandCb(const std_msgs::String& msg)
         LeftCourseFlag_ = true;
     else if (msg.data == "right" && MsgReceiveFlag_)
         RightCourseFlag_ = true;
+    else if (msg.data == "acres" && MsgReceiveFlag_)
+        ActionRestartFlag_ = true;
+    else if (msg.data == "accan" && MsgReceiveFlag_)
+        ActionCancelFlag_ = true;
 }
 
 } /* namespace */
