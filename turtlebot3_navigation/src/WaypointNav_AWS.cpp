@@ -315,8 +315,8 @@ void WaypointNav::WaypointCourseSelectSet(move_base_msgs::MoveBaseGoal& course, 
 {
     uint index_cnt(0);
     if (LeftCourseFlag_){
-        for_each(waypoint_csv_.begin(), waypoint_csv_.end(), [&waypoint_index, &course, &index_cnt](vector<string>& vec) {
-            for_each(vec.begin(), vec.end(), [&vec, &waypoint_index, &course, &index_cnt](string& mode) {
+        for_each(waypoint_csv_.begin(), waypoint_csv_.end(), [&waypoint_index, &course, &index_cnt](vector<string>& vec){
+            for_each(vec.begin(), vec.end(), [&vec, &waypoint_index, &course, &index_cnt](string& mode){
                 if (mode == "LeftCourse"){
                     course.target_pose.pose.position.x    = stod(vec[0]);
                     course.target_pose.pose.position.y    = stod(vec[1]);
