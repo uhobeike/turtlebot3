@@ -40,6 +40,7 @@ public:
     void AmclPoseCb(const geometry_msgs::PoseWithCovarianceStamped& msg);
     void GoalReachedCb(const actionlib_msgs::GoalStatusArray& status);
     void GoalCommandCb(const std_msgs::String& msg);
+    void AwsCb(const std_msgs::String& msg);
 
     void ActionClient_Init();
     void PubSub_Init();
@@ -68,7 +69,7 @@ public:
 private:
     ros::NodeHandle& nh_;
 
-    ros::Subscriber sub_amcl_pose_, sub_movebase_goal_, sub_goal_command_;
+    ros::Subscriber sub_amcl_pose_, sub_movebase_goal_, sub_goal_command_, sub_aws_;
     ros::Publisher ini_pose_, way_pose_array_, way_area_array_, way_number_txt_array_;
     actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> ac_move_base_;
 

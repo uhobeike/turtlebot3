@@ -24,6 +24,8 @@
 #include <sstream>
 #include <cmath>
 
+#include <json_transport/json_transport.hpp>
+
 using namespace::std;
 
 namespace  waypoint_nav {
@@ -62,6 +64,7 @@ void WaypointNav::PubSub_Init()
     sub_amcl_pose_ = nh_.subscribe("amcl_pose", 1, &WaypointNav::AmclPoseCb, this);
     sub_movebase_goal_ = nh_.subscribe("move_base/status", 1, &WaypointNav::GoalReachedCb, this);
     sub_goal_command_ = nh_.subscribe("goal_command", 1, &WaypointNav::GoalCommandCb, this);
+    sub_aws_ = nh_.subscribe("awsiot_to_ros", 1, &WaypointNav::AwsCb, this);
 
     way_pose_array_ = nh_.advertise<geometry_msgs::PoseArray>("waypoint", 1, true);
     way_area_array_ = nh_.advertise<visualization_msgs::MarkerArray>("waypoint_area", 1, true);
@@ -553,6 +556,47 @@ void WaypointNav::GoalCommandCb(const std_msgs::String& msg)
     else if (msg.data == "accan" && MsgReceiveFlag_)
         ActionCancelFlag_ = true;
     else if (msg.data == "frnum" && MsgReceiveFlag_)
+        FreeSelectWaypointMode_ = true;
+}
+
+void WaypointNav::AwsCb(const std_msgs::String& msg)
+{
+    json_transport::json_t command;
+    command = json_transport::json_t::parse(msg.data);
+
+    if (command["command"] == "waypoint" && command["payload"]["action"] == "start"
+        && !MsgReceiveFlag_){
+        MsgReceiveFlag_ = true;
+        Run();
+    }
+    else if (command["command"] == "waypoint" && command["payload"]["action"] == "start"
+             && MsgReceiveFlag_){
+        ReStartFlag_ = true;
+        waypoint_index_++;
+    }
+    else if (command["command"] == "waypoint" && command["payload"]["action"] == "next"
+             && MsgReceiveFlag_)
+        ForcedNextWaypointMode_ = true;
+    else if (command["command"] == "waypoint" && command["payload"]["action"] == "prev"
+             && MsgReceiveFlag_)
+        ForcedPrevWaypointMode_ = true;
+    else if (command["command"] == "waypoint" && command["payload"]["action"] == "initialposi"
+             && MsgReceiveFlag_)
+        ReturnToInitialPositionMode_ = true;
+    else if (command["command"] == "waypoint" && command["payload"]["action"] == "leftcourse"
+             && MsgReceiveFlag_)
+        LeftCourseFlag_ = true;
+    else if (command["command"] == "waypoint" && command["payload"]["action"] == "rightcourse"
+             && MsgReceiveFlag_)
+        RightCourseFlag_ = true;
+    else if (command["command"] == "waypoint" && command["payload"]["action"] == "actionrestart"
+             && MsgReceiveFlag_)
+        ActionRestartFlag_ = true;
+    else if (command["command"] == "waypoint" && command["payload"]["action"] == "actioncancel"
+             && MsgReceiveFlag_)
+        ActionCancelFlag_ = true;
+    else if (command["command"] == "waypoint" && command["payload"]["action"] == "frnum"
+             && MsgReceiveFlag_)
         FreeSelectWaypointMode_ = true;
 }
 
