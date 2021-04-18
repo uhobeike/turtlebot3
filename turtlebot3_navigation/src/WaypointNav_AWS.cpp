@@ -429,21 +429,31 @@ void WaypointNav::Run()
             }
             else if (FreeSelectWaypointMode_){
                 bool IndexCinFlag = false;
-                uint free_select_waypoint_index = 0;
+                string free_select_waypoint_index = "string";
                 if (!FreeSelectWaypointFlag_){
                     ROS_INFO("%s: FreeSelectWaypointMode ON", node_name_.c_str());
                     ROS_INFO("%s: Please choose a waypoint", node_name_.c_str());
                     FreeSelectWaypointFlag_ = true;
                     th = thread([&free_select_waypoint_index, &IndexCinFlag](){
-                        cin >> free_select_waypoint_index;
+                        while ([&free_select_waypoint_index]()->bool{  
+                                    for (char const &c : free_select_waypoint_index){
+                                        if (std::isdigit(c) == 0){
+                                            return false;
+                                        }
+                                    }
+                                    return true;
+                                }() ? false : true){
+                                    cin >> free_select_waypoint_index;
+                                }
                         IndexCinFlag = true;
                     });
                     th.join();
                 }
                 if (FreeSelectWaypointFlag_){
                     if (IndexCinFlag){
-                        ((free_select_waypoint_index >= waypoint_csv_.size()) || free_select_waypoint_index <= 0) 
-                            ? (waypoint_index_):(waypoint_index_ = free_select_waypoint_index - 1);
+                        ((stoi(free_select_waypoint_index) >= waypoint_csv_.size()) || stoi(free_select_waypoint_index) <= 0) 
+                            ? (waypoint_index_):(waypoint_index_ = stoi(free_select_waypoint_index) - 1);
+                        WaypointSet(goal_);
                         FreeSelectWaypointMode_ = false;
                         FreeSelectWaypointFlag_ = false;
                     }
@@ -461,21 +471,30 @@ void WaypointNav::Run()
             ROS_INFO("%s: Move_base ActionCancel", node_name_.c_str());
             if (FreeSelectWaypointMode_){
                 bool IndexCinFlag = false;
-                uint free_select_waypoint_index = 0;
+                string free_select_waypoint_index = "string";
                 if (!FreeSelectWaypointFlag_){
                     ROS_INFO("%s: FreeSelectWaypointMode ON", node_name_.c_str());
                     ROS_INFO("%s: Please choose a waypoint", node_name_.c_str());
                     FreeSelectWaypointFlag_ = true;
                     th = thread([&free_select_waypoint_index, &IndexCinFlag](){
-                        cin >> free_select_waypoint_index;
+                        while ([&free_select_waypoint_index]()->bool{  
+                                    for (char const &c : free_select_waypoint_index){
+                                        if (std::isdigit(c) == 0){
+                                            return false;
+                                        }
+                                    }
+                                    return true;
+                                }() ? false : true){
+                                    cin >> free_select_waypoint_index;
+                                }
                         IndexCinFlag = true;
                     });
                     th.join();
                 }
                 if (FreeSelectWaypointFlag_){
                     if (IndexCinFlag){
-                        ((free_select_waypoint_index >= waypoint_csv_.size()) || free_select_waypoint_index <= 0) 
-                            ? (waypoint_index_):(waypoint_index_ = free_select_waypoint_index - 1);
+                        ((stoi(free_select_waypoint_index) >= waypoint_csv_.size()) || stoi(free_select_waypoint_index) <= 0) 
+                            ? (waypoint_index_):(waypoint_index_ = stoi(free_select_waypoint_index) - 1);
                         FreeSelectWaypointMode_ = false;
                         FreeSelectWaypointFlag_ = false;
                     }
