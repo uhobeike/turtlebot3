@@ -564,39 +564,29 @@ void WaypointNav::AwsCb(const std_msgs::String& msg)
     json_transport::json_t command;
     command = json_transport::json_t::parse(msg.data);
 
-    if (command["command"] == "waypoint" && command["payload"]["action"] == "start"
-        && !MsgReceiveFlag_){
+    if (command["payload"]["action"] == "start" && !MsgReceiveFlag_){
         MsgReceiveFlag_ = true;
         Run();
     }
-    else if (command["command"] == "waypoint" && command["payload"]["action"] == "start"
-             && MsgReceiveFlag_){
+    else if (command["payload"]["action"] == "start" && MsgReceiveFlag_){
         ReStartFlag_ = true;
         waypoint_index_++;
     }
-    else if (command["command"] == "waypoint" && command["payload"]["action"] == "next"
-             && MsgReceiveFlag_)
+    else if (command["payload"]["action"] == "next" && MsgReceiveFlag_)
         ForcedNextWaypointMode_ = true;
-    else if (command["command"] == "waypoint" && command["payload"]["action"] == "prev"
-             && MsgReceiveFlag_)
+    else if (command["payload"]["action"] == "prev" && MsgReceiveFlag_)
         ForcedPrevWaypointMode_ = true;
-    else if (command["command"] == "waypoint" && command["payload"]["action"] == "initialposi"
-             && MsgReceiveFlag_)
+    else if (command["payload"]["action"] == "initialposi" && MsgReceiveFlag_)
         ReturnToInitialPositionMode_ = true;
-    else if (command["command"] == "waypoint" && command["payload"]["action"] == "leftcourse"
-             && MsgReceiveFlag_)
+    else if (command["payload"]["action"] == "leftcourse" && MsgReceiveFlag_)
         LeftCourseFlag_ = true;
-    else if (command["command"] == "waypoint" && command["payload"]["action"] == "rightcourse"
-             && MsgReceiveFlag_)
+    else if (command["payload"]["action"] == "rightcourse" && MsgReceiveFlag_)
         RightCourseFlag_ = true;
-    else if (command["command"] == "waypoint" && command["payload"]["action"] == "actionrestart"
-             && MsgReceiveFlag_)
+    else if (command["payload"]["action"] == "actionrestart" && MsgReceiveFlag_)
         ActionRestartFlag_ = true;
-    else if (command["command"] == "waypoint" && command["payload"]["action"] == "actioncancel"
-             && MsgReceiveFlag_)
+    else if (command["payload"]["action"] == "actioncancel" && MsgReceiveFlag_)
         ActionCancelFlag_ = true;
-    else if (command["command"] == "waypoint" && command["payload"]["action"] == "frnum"
-             && MsgReceiveFlag_)
+    else if (command["payload"]["action"] == "frnum" && MsgReceiveFlag_)
         FreeSelectWaypointMode_ = true;
 }
 
