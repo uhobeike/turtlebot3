@@ -94,15 +94,12 @@ private:
     bool ForcedNextWaypointMode_;
     bool ForcedPrevWaypointMode_;
     bool ReturnToInitialPositionMode_;
-    bool LeftRightCourseSelectMode_;
     bool FreeSelectWaypointMode_;
 
     bool FinalGoalFlag_;
     bool ReStartFlag_; 
     bool MsgReceiveFlag_;
     bool GoalReachedFlag_;
-    bool LeftCourseFlag_;
-    bool RightCourseFlag_;
     bool ActionRestartFlag_;
     bool ActionCancelFlag_;
     bool FreeSelectWaypointFlag_;

@@ -39,12 +39,12 @@ WaypointNav::WaypointNav(ros::NodeHandle& nodeHandle, std::string node_name, std
                         waypoint_area_threshold_(0.5), waypoint_area_check_(0.0),
                         //Mode
                         NextWaypointMode_(true), FinalGoalWaypointMode_(false), ReStartWaypointMode_(false), 
-                        GoalReachedMode_(false), LeftRightCourseSelectMode_(false),
+                        GoalReachedMode_(false),
                         ForcedNextWaypointMode_(false), ForcedPrevWaypointMode_(false), 
                         ReturnToInitialPositionMode_(false), FreeSelectWaypointMode_(false),
                         //Flag
                         GoalReachedFlag_(false), FinalGoalFlag_(false), ReStartFlag_(false), 
-                        MsgReceiveFlag_(false), LeftCourseFlag_(false), RightCourseFlag_(false), 
+                        MsgReceiveFlag_(false),
                         ActionRestartFlag_(false), ActionCancelFlag_(false), FreeSelectWaypointFlag_(false)
 {
     PubSub_Init();
@@ -227,10 +227,6 @@ void WaypointNav::WaypointInfoManagement()
         ModeFlagOff();
         GoalReachedMode_ = true;
     }
-    else if (waypoint_csv_[waypoint_index_][4] == "LeftRightCourseSelect"){
-        ModeFlagOff();
-        LeftRightCourseSelectMode_ = true;
-    }
     else if (waypoint_csv_[waypoint_index_][4] == "LeftCourse" || waypoint_csv_[waypoint_index_][4] == "RightCourse"){
         ModeFlagOff();
         NextWaypointMode_ = true;
@@ -321,53 +317,15 @@ void WaypointNav::WaypointInitSet(move_base_msgs::MoveBaseGoal& init)
     ac_move_base_.sendGoal(init);
 }
 
-void WaypointNav::WaypointCourseSelectSet(move_base_msgs::MoveBaseGoal& course, uint& waypoint_index)
-{
-    uint index_cnt(0);
-    if (LeftCourseFlag_){
-        for_each(waypoint_csv_.begin(), waypoint_csv_.end(), [&waypoint_index, &course, &index_cnt](vector<string>& vec){
-            for_each(vec.begin(), vec.end(), [&vec, &waypoint_index, &course, &index_cnt](string& mode){
-                if (mode == "LeftCourse"){
-                    course.target_pose.pose.position.x    = stod(vec[0]);
-                    course.target_pose.pose.position.y    = stod(vec[1]);
-                    course.target_pose.pose.orientation.z = stod(vec[2]);
-                    course.target_pose.pose.orientation.w = stod(vec[3]);
-                    waypoint_index = index_cnt;
-                }
-            });
-            index_cnt++;
-        });
-    }
-    else if (RightCourseFlag_){
-        uint index_cnt(0);
-        for_each(waypoint_csv_.begin(), waypoint_csv_.end(), [&waypoint_index, &course, &index_cnt](vector<string>& vec){
-            for_each(vec.begin(), vec.end(), [&vec, &waypoint_index, &course, &index_cnt](string& mode){
-                if (mode == "RightCourse"){
-                    course.target_pose.pose.position.x    = stod(vec[0]);
-                    course.target_pose.pose.position.y    = stod(vec[1]);
-                    course.target_pose.pose.orientation.z = stod(vec[2]);
-                    course.target_pose.pose.orientation.w = stod(vec[3]);
-                    waypoint_index = index_cnt;
-                }
-            });
-            index_cnt++;
-        });
-    }
-    ac_move_base_.sendGoal(course);
-}
-
 void WaypointNav::ModeFlagOff()
 {
     NextWaypointMode_           = false;
     FinalGoalWaypointMode_      = false;
     ReStartWaypointMode_        = false;
     GoalReachedMode_            = false;
-    LeftRightCourseSelectMode_  = false;
 
     GoalReachedFlag_        = false;
     ReStartFlag_            = false;
-    LeftCourseFlag_ = false;
-    RightCourseFlag_ = false; 
 }
 
 void WaypointNav::ModeFlagDebug()
@@ -405,11 +363,6 @@ void WaypointNav::Run()
                 else if (GoalReachedMode_){
                     if (WaypointAreaCheck() && GoalReachCheck())
                         WaypointSet(goal_);
-                }
-                else if (LeftRightCourseSelectMode_){
-                    if (LeftCourseFlag_ || RightCourseFlag_){
-                        WaypointCourseSelectSet(goal_, waypoint_index_);
-                    }
                 }
                 ModeFlagDebug();
                 WaypointInfoManagement();
@@ -547,10 +500,6 @@ void WaypointNav::GoalCommandCb(const std_msgs::String& msg)
         ForcedPrevWaypointMode_ = true;
     else if (msg.data == "init" && MsgReceiveFlag_)
         ReturnToInitialPositionMode_ = true;
-    else if (msg.data == "left" && MsgReceiveFlag_)
-        LeftCourseFlag_ = true;
-    else if (msg.data == "right" && MsgReceiveFlag_)
-        RightCourseFlag_ = true;
     else if (msg.data == "acres" && MsgReceiveFlag_)
         ActionRestartFlag_ = true;
     else if (msg.data == "accan" && MsgReceiveFlag_)
@@ -578,10 +527,6 @@ void WaypointNav::AwsCb(const std_msgs::String& msg)
         ForcedPrevWaypointMode_ = true;
     else if (command["payload"]["action"] == "initialposi" && MsgReceiveFlag_)
         ReturnToInitialPositionMode_ = true;
-    else if (command["payload"]["action"] == "leftcourse" && MsgReceiveFlag_)
-        LeftCourseFlag_ = true;
-    else if (command["payload"]["action"] == "rightcourse" && MsgReceiveFlag_)
-        RightCourseFlag_ = true;
     else if (command["payload"]["action"] == "actionrestart" && MsgReceiveFlag_)
         ActionRestartFlag_ = true;
     else if (command["payload"]["action"] == "actioncancel" && MsgReceiveFlag_)
