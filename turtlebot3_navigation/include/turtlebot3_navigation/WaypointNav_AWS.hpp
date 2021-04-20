@@ -70,7 +70,7 @@ private:
     ros::NodeHandle& nh_;
 
     ros::Subscriber sub_amcl_pose_, sub_movebase_goal_, sub_goal_command_, sub_aws_;
-    ros::Publisher ini_pose_, way_pose_array_, way_area_array_, way_number_txt_array_;
+    ros::Publisher ini_pose_, way_pose_array_, way_area_array_, way_number_txt_array_, aws_debug_;
     actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> ac_move_base_;
 
     string node_name_;
@@ -85,8 +85,9 @@ private:
     float waypoint_area_check_;
 
     move_base_msgs::MoveBaseGoal goal_;
-    thread th;
+    thread th_;
 
+    //Mode
     bool NextWaypointMode_;
     bool FinalGoalWaypointMode_;
     bool ReStartWaypointMode_;
@@ -95,7 +96,9 @@ private:
     bool ForcedPrevWaypointMode_;
     bool ReturnToInitialPositionMode_;
     bool FreeSelectWaypointMode_;
+    bool FreeSelectWaypointAWSMode_;
 
+    //Flag
     bool FinalGoalFlag_;
     bool ReStartFlag_; 
     bool MsgReceiveFlag_;
@@ -103,6 +106,9 @@ private:
     bool ActionRestartFlag_;
     bool ActionCancelFlag_;
     bool FreeSelectWaypointFlag_;
+
+    //Value
+    uint waypoint_index_awsiot_;
 };
 
 } /* namespace */
