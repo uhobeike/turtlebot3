@@ -22,6 +22,8 @@
   <build_depend>actionlib</build_depend>
   <build_depend>actionlib_msgs</build_depend>
   <build_depend>message_generation</build_depend>
+  <build_depend>json_transport</build_depend>
+
 
   <exec_depend>amcl</exec_depend>
   <exec_depend>map_server</exec_depend>
@@ -32,4 +34,6 @@
   <exec_depend>actionlib</exec_depend>
   <exec_depend>actionlib_msgs</exec_depend>
   <exec_depend>message_runtime</exec_depend>
+  <exec_depend>json_transport</exec_depend>
+  
 </package>
