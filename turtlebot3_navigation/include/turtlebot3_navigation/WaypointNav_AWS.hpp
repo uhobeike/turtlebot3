@@ -21,6 +21,7 @@
 #include <actionlib/client/simple_action_client.h>
 #include <move_base_msgs/MoveBaseAction.h>
 #include <std_msgs/String.h>
+#include <geometry_msgs/PoseArray.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <visualization_msgs/MarkerArray.h>
 
@@ -51,6 +52,9 @@ public:
                                 visualization_msgs::MarkerArray& waypoint_number_txt,
                                 uint8_t index, uint8_t siz);
     void StrategyCheck(vector<string>& waypoint_csv_);
+    void DividedByStrategyArray(geometry_msgs::PoseArray& pose_array, visualization_msgs::MarkerArray& waypoint_area, 
+                                visualization_msgs::MarkerArray& waypoint_number_txt);
+
     void WaypointInfoManagement();
     bool WaypointAreaCheck();
     bool GoalReachCheck();
@@ -81,9 +85,16 @@ private:
     string csv_fname_;
     uint waypoint_csv_index_;
     double strategy_rviz_;
+    vector <geometry_msgs::PoseArray> pose_array_vtr_;
+    geometry_msgs::PoseArray pose_array_;
+    vector<visualization_msgs::MarkerArray> waypoint_area_vtr_;
+    visualization_msgs::MarkerArray waypoint_area_;
+    vector<visualization_msgs::MarkerArray> waypoint_number_txt_vtr_;
+    visualization_msgs::MarkerArray waypoint_number_txt_;
+
     uint waypoint_index_;
     vector<vector<string>> waypoint_csv_;
-    vector<double> amcl_pose_;  
+    vector<double> amcl_pose_;
 
     float waypoint_area_threshold_;
     float waypoint_area_check_;

@@ -15,7 +15,6 @@
 */
 
 #include <ros/ros.h>
-#include <geometry_msgs/PoseArray.h>
 
 #include "turtlebot3_navigation/WaypointNav_AWS.hpp"
 
@@ -163,6 +162,8 @@ void WaypointNav::WaypointRvizVisualization()
     way_pose_array_.publish(pose_array);
     way_area_array_.publish(waypoint_area);
     way_number_txt_array_.publish(waypoint_number_txt);
+
+    DividedByStrategyArray(pose_array, waypoint_area, waypoint_number_txt);
 }
 
 void WaypointNav::WaypointMarkerArraySet(visualization_msgs::MarkerArray& waypoint_area, 
@@ -220,11 +221,51 @@ void WaypointNav::WaypointMarkerArraySet(visualization_msgs::MarkerArray& waypoi
     /*___________________________________________________________________________________*/
 }
 
-void WaypointNav::StrategyCheck(vector<string>& waypoint_csv_)
+void WaypointNav::StrategyCheck(vector<string>& waypoint_csv)
 {
-    if (waypoint_csv_.size() == 6){
+    if (waypoint_csv.size() == 6){
         strategy_rviz_ -= 0.1;
     } 
+}
+
+void WaypointNav::DividedByStrategyArray(geometry_msgs::PoseArray& pose_array, visualization_msgs::MarkerArray& waypoint_area, 
+                            visualization_msgs::MarkerArray& waypoint_number_txt)
+{
+    // cout << pose_array.poses.size() << ", "
+    //      << waypoint_area.markers.size() << ", "
+    //      << waypoint_number_txt.markers.size() << "\n";
+    int cnt(0);
+    // pose_array_vtr_.resize(waypoint_csv_index_+1);
+    // waypoint_area_vtr_.resize(waypoint_csv_index_+1);
+    // waypoint_number_txt_vtr_.resize(waypoint_csv_index_+1);
+
+    for (auto it_t = waypoint_csv_.begin(); it_t != waypoint_csv_.end(); ++it_t){
+        if (cnt == waypoint_csv_.size())
+            break;
+        if (waypoint_csv_[distance(waypoint_csv_.begin(), it_t)].size() == 6 && cnt){
+            pose_array_vtr_.push_back(pose_array_);
+            waypoint_area_vtr_.push_back(waypoint_area_);
+            waypoint_number_txt_vtr_.push_back(waypoint_number_txt_);
+            pose_array_.poses.clear();
+            waypoint_area_.markers.clear();
+            waypoint_number_txt_.markers.clear();
+        }
+        pose_array_.poses.push_back(pose_array.poses[cnt]);
+        waypoint_area_.markers.push_back(waypoint_area.markers[cnt]);
+        waypoint_number_txt_.markers.push_back(waypoint_number_txt.markers[cnt]);
+        waypoint_area.markers[cnt].action = visualization_msgs::Marker::DELETE;
+        waypoint_number_txt.markers[cnt].action = visualization_msgs::Marker::DELETE;
+
+        cnt++;
+    }
+    pose_array_vtr_[0].header.frame_id = "map";
+    pose_array_vtr_[1].header.frame_id = "map";
+    pose_array_vtr_[2].header.frame_id = "map";
+    way_pose_array_.publish(pose_array_vtr_[1]);
+    way_area_array_.publish(waypoint_area);
+    way_number_txt_array_.publish(waypoint_number_txt);
+    way_area_array_.publish(waypoint_area_vtr_[1]);
+    way_number_txt_array_.publish(waypoint_number_txt_vtr_[1]);
 }
 
 void WaypointNav::WaypointInfoManagement()
