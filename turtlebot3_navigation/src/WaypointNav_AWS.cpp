@@ -351,13 +351,13 @@ void WaypointNav::ModeFlagDebugAWS()
 {
     json_transport::json_t payload;
     payload["waynavinfo"] = {
-        {"NextWaypointMode", NextWaypointMode_},
-        {"FinalGoalWaypointMode", FinalGoalWaypointMode_},
-        {"ReStartWaypointMode", ReStartWaypointMode_},
-        {"GoalReachedMode", GoalReachedMode_},
-        {"GoalReachedFlag", GoalReachedFlag_},
-        {"ActionCancelFlag", ActionCancelFlag_},
-        {"WaypointIndex", waypoint_index_}
+        {"NextWaypointMode", NextWaypointMode_ ? 1 : 0},
+        {"FinalGoalWaypointMode", FinalGoalWaypointMode_ ? 1 : 0},
+        {"ReStartWaypointMode", ReStartWaypointMode_ ? 1 : 0},
+        {"GoalReachedMode", GoalReachedMode_ ? 1 : 0},
+        {"GoalReachedFlag", GoalReachedFlag_ ? 1 : 0},
+        {"ActionCancelFlag", ActionCancelFlag_ ? 1 : 0},
+        {"WaypointIndex", waypoint_index_ + 1}
     };
     payload["command"] = "waypoint";
     std_msgs::String WaypointNavInfoStr;
@@ -456,6 +456,7 @@ void WaypointNav::Run()
         }
         else if (ActionCancelFlag_){
             ac_move_base_.cancelAllGoals();
+            ModeFlagDebugAWS();
             ROS_INFO("%s: Move_base ActionCancel", node_name_.c_str());
             if (FreeSelectWaypointMode_){
                 bool IndexCinFlag = false;
