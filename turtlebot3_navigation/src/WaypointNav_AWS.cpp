@@ -343,7 +343,7 @@ void WaypointNav::ModeFlagDebug()
          << "GoalReachedFlag : "        << GoalReachedFlag_                 << "\n"
          << "ActionCancelFlag: "        << ActionCancelFlag_                << "\n"
          << "~~~~~~~~~~~~~~~~~~~\n"
-         << "WaypointIndex   : "        << waypoint_index_          << "\n"
+         << "WaypointIndex   : "        << waypoint_index_ + 1              << "\n"
          << "___________________\n";
 }
 
