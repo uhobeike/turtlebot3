@@ -65,12 +65,14 @@ public:
     void Run();
 
     void ModeFlagDebug();
+    void ModeFlagDebugAWS();
 
 private:
     ros::NodeHandle& nh_;
 
     ros::Subscriber sub_amcl_pose_, sub_movebase_goal_, sub_goal_command_, sub_aws_;
-    ros::Publisher ini_pose_, way_pose_array_, way_area_array_, way_number_txt_array_, aws_debug_;
+    ros::Publisher ini_pose_, way_pose_array_, way_area_array_, way_number_txt_array_, 
+                   aws_debug_, ros_to_awsiot_;
     actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> ac_move_base_;
 
     string node_name_;

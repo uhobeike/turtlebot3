@@ -72,6 +72,7 @@ void WaypointNav::PubSub_Init()
     way_area_array_ = nh_.advertise<visualization_msgs::MarkerArray>("waypoint_area", 1, true);
     way_number_txt_array_ = nh_.advertise<visualization_msgs::MarkerArray>("waypoint_number_txt", 1, true);
 
+    ros_to_awsiot_ = nh_.advertise<std_msgs::String>("ros_to_awsiot", 1, true);
     aws_debug_ = nh_.advertise<std_msgs::String>("aws_debug", 1, true);
 }
 
@@ -340,9 +341,28 @@ void WaypointNav::ModeFlagDebug()
          << "ReStartWaypointMode : "    << ReStartWaypointMode_             << "\n"
          << "GoalReachedMode : "        << GoalReachedMode_                 << "\n"
          << "GoalReachedFlag : "        << GoalReachedFlag_                 << "\n"
+         << "ActionCancelFlag: "        << ActionCancelFlag_                << "\n"
          << "~~~~~~~~~~~~~~~~~~~\n"
          << "WaypointIndex   : "        << waypoint_index_          << "\n"
          << "___________________\n";
+}
+
+void WaypointNav::ModeFlagDebugAWS()
+{
+    json_transport::json_t payload;
+    payload["waynavinfo"] = {
+        {"NextWaypointMode", NextWaypointMode_},
+        {"FinalGoalWaypointMode", FinalGoalWaypointMode_},
+        {"ReStartWaypointMode", ReStartWaypointMode_},
+        {"GoalReachedMode", GoalReachedMode_},
+        {"GoalReachedFlag", GoalReachedFlag_},
+        {"ActionCancelFlag", ActionCancelFlag_},
+        {"WaypointIndex", waypoint_index_}
+    };
+    payload["command"] = "waypoint";
+    std_msgs::String WaypointNavInfoStr;
+    WaypointNavInfoStr.data = payload.dump(); 
+    ros_to_awsiot_.publish(WaypointNavInfoStr);
 }
 
 void WaypointNav::Run()
@@ -353,7 +373,8 @@ void WaypointNav::Run()
     ros::Rate loop_rate(5);
     while (ros::ok()){
         if (!ActionCancelFlag_){
-            if (!ForcedNextWaypointMode_ && !ForcedPrevWaypointMode_ && !ReturnToInitialPositionMode_ && !FreeSelectWaypointMode_){
+            if (!ForcedNextWaypointMode_ && !ForcedPrevWaypointMode_ && !ReturnToInitialPositionMode_ 
+                && !FreeSelectWaypointMode_ && !FreeSelectWaypointAWSMode_){
                 if (NextWaypointMode_){
                     if (WaypointAreaCheck())
                         WaypointSet(goal_);
@@ -369,6 +390,7 @@ void WaypointNav::Run()
                         WaypointSet(goal_);
                 }
                 ModeFlagDebug();
+                ModeFlagDebugAWS();
                 WaypointInfoManagement();
             }
             else if (ForcedNextWaypointMode_){
@@ -402,9 +424,10 @@ void WaypointNav::Run()
                                         }
                                     }
                                     return true;
-                                }() ? false : true){
-                                    cin >> free_select_waypoint_index;
-                                }
+                                }() 
+                            ? false : true){
+                            cin >> free_select_waypoint_index;
+                        }
                         IndexCinFlag = true;
                     });
                     th_.join();
@@ -418,6 +441,11 @@ void WaypointNav::Run()
                         FreeSelectWaypointFlag_ = false;
                     }
                 }
+            }
+            else if (FreeSelectWaypointAWSMode_){
+                (waypoint_index_awsiot_ >= waypoint_csv_.size() || waypoint_index_awsiot_ <= 0) 
+                ? (waypoint_index_):(waypoint_index_ = waypoint_index_awsiot_ - 1);
+                FreeSelectWaypointAWSMode_ = false;
             }
         }
         else if (ActionRestartFlag_){
@@ -444,9 +472,10 @@ void WaypointNav::Run()
                                         }
                                     }
                                     return true;
-                                }() ? false : true){
-                                    cin >> free_select_waypoint_index;
-                                }
+                                }() 
+                            ? false : true){
+                            cin >> free_select_waypoint_index;
+                        }
                         IndexCinFlag = true;
                     });
                     th_.join();
