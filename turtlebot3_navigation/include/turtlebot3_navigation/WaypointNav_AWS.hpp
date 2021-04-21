@@ -50,6 +50,7 @@ public:
     void WaypointMarkerArraySet(visualization_msgs::MarkerArray& waypoint_area, 
                                 visualization_msgs::MarkerArray& waypoint_number_txt,
                                 uint8_t index, uint8_t siz);
+    void StrategyCheck(vector<string>& waypoint_csv_);
     void WaypointInfoManagement();
     bool WaypointAreaCheck();
     bool GoalReachCheck();
@@ -79,6 +80,7 @@ private:
 
     string csv_fname_;
     uint waypoint_csv_index_;
+    double strategy_rviz_;
     uint waypoint_index_;
     vector<vector<string>> waypoint_csv_;
     vector<double> amcl_pose_;  

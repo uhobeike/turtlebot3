@@ -34,7 +34,7 @@ WaypointNav::WaypointNav(ros::NodeHandle& nodeHandle, std::string node_name, std
                         nh_(nodeHandle),
                         ac_move_base_("move_base", true),
                         node_name_(node_name),
-                        csv_fname_(file_name), waypoint_csv_index_(1), waypoint_index_(0),
+                        csv_fname_(file_name), waypoint_csv_index_(1), waypoint_index_(0), strategy_rviz_(0.2),
                         waypoint_csv_(1, vector<string>(0)), amcl_pose_(4, 0),
                         waypoint_area_threshold_(0.5), waypoint_area_check_(0.0),
                         //Mode
@@ -118,10 +118,11 @@ void WaypointNav::WaypointRvizVisualization()
     uint8_t vec_cnt_index (0);
     for (auto it_t = waypoint_csv_.begin(); it_t != waypoint_csv_.end(); ++it_t){
         vec_cnt_index = 0;
+
+        StrategyCheck(*it_t);
         WaypointMarkerArraySet(waypoint_area, 
                                waypoint_number_txt,
                                distance(waypoint_csv_.begin(), it_t), waypoint_csv_[distance(waypoint_csv_.begin(), it_t)].size());
-        
         for (auto it = (*it_t).begin(); it != (*it_t).end(); ++it){
             switch (vec_cnt_index){
                 case 0: 
@@ -135,7 +136,7 @@ void WaypointNav::WaypointRvizVisualization()
                     pose.position.y = stod(*it);
                     if (waypoint_csv_[distance(waypoint_csv_.begin(), it_t)].size() == 4)
                         waypoint_area.markers[distance(waypoint_csv_.begin(), it_t)].pose.position.y = stod(*it);
-                    waypoint_number_txt.markers[distance(waypoint_csv_.begin(), it_t)].pose.position.y = stod(*it);
+                    waypoint_number_txt.markers[distance(waypoint_csv_.begin(), it_t)].pose.position.y = stod(*it) + strategy_rviz_;
                     vec_cnt_index++;
                     continue;
 
@@ -200,11 +201,30 @@ void WaypointNav::WaypointMarkerArraySet(visualization_msgs::MarkerArray& waypoi
     geometry_msgs::Vector3 text;
     text.z = waypoint_area_threshold_/2;
     waypoint_number_txt.markers[index].scale = text;
-    waypoint_number_txt.markers[index].color.a = 1.0f;
-    waypoint_number_txt.markers[index].color.b = 1.0f;
-    waypoint_number_txt.markers[index].color.g = 1.0f;
-    waypoint_number_txt.markers[index].color.r = 1.0f;
+    waypoint_number_txt.markers[index].color.a = 0.9f;
+    if (strategy_rviz_ > 0){
+        waypoint_number_txt.markers[index].color.b = 1.0f;
+        waypoint_number_txt.markers[index].color.g = 0.0f;
+        waypoint_number_txt.markers[index].color.r = 0.0f;
+    }
+    else if (strategy_rviz_ == 0){
+        waypoint_number_txt.markers[index].color.b = 0.0f;
+        waypoint_number_txt.markers[index].color.g = 1.0f;
+        waypoint_number_txt.markers[index].color.r = 0.0f;
+    }
+    else if (strategy_rviz_ < 0){
+        waypoint_number_txt.markers[index].color.b = 0.0f;
+        waypoint_number_txt.markers[index].color.g = 0.0f;
+        waypoint_number_txt.markers[index].color.r = 1.0f;
+    }
     /*___________________________________________________________________________________*/
+}
+
+void WaypointNav::StrategyCheck(vector<string>& waypoint_csv_)
+{
+    if (waypoint_csv_.size() == 6){
+        strategy_rviz_ -= 0.1;
+    } 
 }
 
 void WaypointNav::WaypointInfoManagement()
