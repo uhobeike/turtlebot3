@@ -665,28 +665,28 @@ void WaypointNav::AwsCb(const std_msgs::String& msg)
             FreeSelectWaypointAWSMode_ = true;
         }
     }
-    else if (command["payload"]["action"] == "str1"){
+    else if (command["payload"]["action"] == "strategy1"){
         way_pose_array_.publish(pose_array_vtr_[0]);
         way_area_array_.publish(waypoint_area_delete_);
         way_number_txt_array_.publish(waypoint_number_txt_delete_);
         way_area_array_.publish(waypoint_area_vtr_[0]);
         way_number_txt_array_.publish(waypoint_number_txt_vtr_[0]);
     }
-    else if (command["payload"]["action"] == "str2"){
+    else if (command["payload"]["action"] == "strategy2"){
         way_pose_array_.publish(pose_array_vtr_[1]);
         way_area_array_.publish(waypoint_area_delete_);
         way_number_txt_array_.publish(waypoint_number_txt_delete_);
         way_area_array_.publish(waypoint_area_vtr_[1]);
         way_number_txt_array_.publish(waypoint_number_txt_vtr_[1]);
     }
-    else if (command["payload"]["action"] == "str3"){
+    else if (command["payload"]["action"] == "strategy3"){
         way_pose_array_.publish(pose_array_vtr_[2]);
         way_area_array_.publish(waypoint_area_delete_);
         way_number_txt_array_.publish(waypoint_number_txt_delete_);
         way_area_array_.publish(waypoint_area_vtr_[2]);
         way_number_txt_array_.publish(waypoint_number_txt_vtr_[2]);
     }
-    else if (command["payload"]["action"] == "str123"){
+    else if (command["payload"]["action"] == "strategy123"){
         way_pose_array_.publish(pose_array_);
         way_area_array_.publish(waypoint_area_delete_);
         way_number_txt_array_.publish(waypoint_number_txt_delete_);
