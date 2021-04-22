@@ -87,10 +87,15 @@ private:
     double strategy_rviz_;
     vector <geometry_msgs::PoseArray> pose_array_vtr_;
     geometry_msgs::PoseArray pose_array_;
+    geometry_msgs::PoseArray pose_array_divide_;
     vector<visualization_msgs::MarkerArray> waypoint_area_vtr_;
     visualization_msgs::MarkerArray waypoint_area_;
+    visualization_msgs::MarkerArray waypoint_area_divide_;
+    visualization_msgs::MarkerArray waypoint_area_delete_;
     vector<visualization_msgs::MarkerArray> waypoint_number_txt_vtr_;
     visualization_msgs::MarkerArray waypoint_number_txt_;
+    visualization_msgs::MarkerArray waypoint_number_txt_divide_;
+    visualization_msgs::MarkerArray waypoint_number_txt_delete_;
 
     uint waypoint_index_;
     vector<vector<string>> waypoint_csv_;

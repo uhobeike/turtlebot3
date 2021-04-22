@@ -163,6 +163,9 @@ void WaypointNav::WaypointRvizVisualization()
     way_area_array_.publish(waypoint_area);
     way_number_txt_array_.publish(waypoint_number_txt);
 
+    pose_array_          = pose_array;
+    waypoint_area_       = waypoint_area;
+    waypoint_number_txt_ = waypoint_number_txt;
     DividedByStrategyArray(pose_array, waypoint_area, waypoint_number_txt);
 }
 
@@ -231,28 +234,22 @@ void WaypointNav::StrategyCheck(vector<string>& waypoint_csv)
 void WaypointNav::DividedByStrategyArray(geometry_msgs::PoseArray& pose_array, visualization_msgs::MarkerArray& waypoint_area, 
                             visualization_msgs::MarkerArray& waypoint_number_txt)
 {
-    // cout << pose_array.poses.size() << ", "
-    //      << waypoint_area.markers.size() << ", "
-    //      << waypoint_number_txt.markers.size() << "\n";
     int cnt(0);
-    // pose_array_vtr_.resize(waypoint_csv_index_+1);
-    // waypoint_area_vtr_.resize(waypoint_csv_index_+1);
-    // waypoint_number_txt_vtr_.resize(waypoint_csv_index_+1);
 
     for (auto it_t = waypoint_csv_.begin(); it_t != waypoint_csv_.end(); ++it_t){
         if (cnt == waypoint_csv_.size())
             break;
         if (waypoint_csv_[distance(waypoint_csv_.begin(), it_t)].size() == 6 && cnt){
-            pose_array_vtr_.push_back(pose_array_);
-            waypoint_area_vtr_.push_back(waypoint_area_);
-            waypoint_number_txt_vtr_.push_back(waypoint_number_txt_);
-            pose_array_.poses.clear();
-            waypoint_area_.markers.clear();
-            waypoint_number_txt_.markers.clear();
+            pose_array_vtr_.push_back(pose_array_divide_);
+            waypoint_area_vtr_.push_back(waypoint_area_divide_);
+            waypoint_number_txt_vtr_.push_back(waypoint_number_txt_divide_);
+            pose_array_divide_.poses.clear();
+            waypoint_area_divide_.markers.clear();
+            waypoint_number_txt_divide_.markers.clear();
         }
-        pose_array_.poses.push_back(pose_array.poses[cnt]);
-        waypoint_area_.markers.push_back(waypoint_area.markers[cnt]);
-        waypoint_number_txt_.markers.push_back(waypoint_number_txt.markers[cnt]);
+        pose_array_divide_.poses.push_back(pose_array.poses[cnt]);
+        waypoint_area_divide_.markers.push_back(waypoint_area.markers[cnt]);
+        waypoint_number_txt_divide_.markers.push_back(waypoint_number_txt.markers[cnt]);
         waypoint_area.markers[cnt].action = visualization_msgs::Marker::DELETE;
         waypoint_number_txt.markers[cnt].action = visualization_msgs::Marker::DELETE;
 
@@ -261,11 +258,14 @@ void WaypointNav::DividedByStrategyArray(geometry_msgs::PoseArray& pose_array, v
     pose_array_vtr_[0].header.frame_id = "map";
     pose_array_vtr_[1].header.frame_id = "map";
     pose_array_vtr_[2].header.frame_id = "map";
-    way_pose_array_.publish(pose_array_vtr_[1]);
-    way_area_array_.publish(waypoint_area);
-    way_number_txt_array_.publish(waypoint_number_txt);
-    way_area_array_.publish(waypoint_area_vtr_[1]);
-    way_number_txt_array_.publish(waypoint_number_txt_vtr_[1]);
+
+    waypoint_area_delete_ = waypoint_area;
+    waypoint_number_txt_delete_ = waypoint_number_txt;
+    // way_pose_array_.publish(pose_array_vtr_[1]);
+    // way_area_array_.publish(waypoint_area);
+    // way_number_txt_array_.publish(waypoint_number_txt);
+    // way_area_array_.publish(waypoint_area_vtr_[1]);
+    // way_number_txt_array_.publish(waypoint_number_txt_vtr_[1]);
 }
 
 void WaypointNav::WaypointInfoManagement()
@@ -606,6 +606,34 @@ void WaypointNav::GoalCommandCb(const std_msgs::String& msg)
         ActionCancelFlag_ = true;
     else if (msg.data == "frnum" && MsgReceiveFlag_)
         FreeSelectWaypointMode_ = true;
+    else if (msg.data == "str1"){
+        way_pose_array_.publish(pose_array_vtr_[0]);
+        way_area_array_.publish(waypoint_area_delete_);
+        way_number_txt_array_.publish(waypoint_number_txt_delete_);
+        way_area_array_.publish(waypoint_area_vtr_[0]);
+        way_number_txt_array_.publish(waypoint_number_txt_vtr_[0]);
+    }
+    else if (msg.data == "str2"){
+        way_pose_array_.publish(pose_array_vtr_[1]);
+        way_area_array_.publish(waypoint_area_delete_);
+        way_number_txt_array_.publish(waypoint_number_txt_delete_);
+        way_area_array_.publish(waypoint_area_vtr_[1]);
+        way_number_txt_array_.publish(waypoint_number_txt_vtr_[1]);
+    }
+    else if (msg.data == "str3"){
+        way_pose_array_.publish(pose_array_vtr_[2]);
+        way_area_array_.publish(waypoint_area_delete_);
+        way_number_txt_array_.publish(waypoint_number_txt_delete_);
+        way_area_array_.publish(waypoint_area_vtr_[2]);
+        way_number_txt_array_.publish(waypoint_number_txt_vtr_[2]);
+    }
+    else if (msg.data == "str123"){
+        way_pose_array_.publish(pose_array_);
+        way_area_array_.publish(waypoint_area_delete_);
+        way_number_txt_array_.publish(waypoint_number_txt_delete_);
+        way_area_array_.publish(waypoint_area_);
+        way_number_txt_array_.publish(waypoint_number_txt_);
+    }
 }
 
 void WaypointNav::AwsCb(const std_msgs::String& msg)
@@ -636,6 +664,34 @@ void WaypointNav::AwsCb(const std_msgs::String& msg)
             waypoint_index_awsiot_ = command["payload"]["waypoint_index"];
             FreeSelectWaypointAWSMode_ = true;
         }
+    }
+    else if (command["payload"]["action"] == "str1"){
+        way_pose_array_.publish(pose_array_vtr_[0]);
+        way_area_array_.publish(waypoint_area_delete_);
+        way_number_txt_array_.publish(waypoint_number_txt_delete_);
+        way_area_array_.publish(waypoint_area_vtr_[0]);
+        way_number_txt_array_.publish(waypoint_number_txt_vtr_[0]);
+    }
+    else if (command["payload"]["action"] == "str2"){
+        way_pose_array_.publish(pose_array_vtr_[1]);
+        way_area_array_.publish(waypoint_area_delete_);
+        way_number_txt_array_.publish(waypoint_number_txt_delete_);
+        way_area_array_.publish(waypoint_area_vtr_[1]);
+        way_number_txt_array_.publish(waypoint_number_txt_vtr_[1]);
+    }
+    else if (command["payload"]["action"] == "str3"){
+        way_pose_array_.publish(pose_array_vtr_[2]);
+        way_area_array_.publish(waypoint_area_delete_);
+        way_number_txt_array_.publish(waypoint_number_txt_delete_);
+        way_area_array_.publish(waypoint_area_vtr_[2]);
+        way_number_txt_array_.publish(waypoint_number_txt_vtr_[2]);
+    }
+    else if (command["payload"]["action"] == "str123"){
+        way_pose_array_.publish(pose_array_);
+        way_area_array_.publish(waypoint_area_delete_);
+        way_number_txt_array_.publish(waypoint_number_txt_delete_);
+        way_area_array_.publish(waypoint_area_);
+        way_number_txt_array_.publish(waypoint_number_txt_);
     }
 }
 
