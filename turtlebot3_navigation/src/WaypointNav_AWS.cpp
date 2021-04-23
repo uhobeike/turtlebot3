@@ -261,11 +261,6 @@ void WaypointNav::DividedByStrategyArray(geometry_msgs::PoseArray& pose_array, v
 
     waypoint_area_delete_ = waypoint_area;
     waypoint_number_txt_delete_ = waypoint_number_txt;
-    // way_pose_array_.publish(pose_array_vtr_[1]);
-    // way_area_array_.publish(waypoint_area);
-    // way_number_txt_array_.publish(waypoint_number_txt);
-    // way_area_array_.publish(waypoint_area_vtr_[1]);
-    // way_number_txt_array_.publish(waypoint_number_txt_vtr_[1]);
 }
 
 void WaypointNav::WaypointInfoManagement()
@@ -455,7 +450,6 @@ void WaypointNav::Run()
                 WaypointInfoManagement();
             }
             else if (ForcedNextWaypointMode_){
-                waypoint_index_++;
                 WaypointNextSet(goal_);
                 ForcedNextWaypointMode_ = false;
                 ROS_INFO("%s: ForcedNextWaypointMode ON", node_name_.c_str());
