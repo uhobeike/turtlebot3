@@ -428,7 +428,7 @@ void WaypointNav::Run()
 
     ros::Rate loop_rate(5);
     while (ros::ok()){
-        if (!ActionCancelFlag_){
+        if (!ActionRestartFlag_ && !ActionCancelFlag_){
             if (!ForcedNextWaypointMode_ && !ForcedPrevWaypointMode_ && !ReturnToInitialPositionMode_ 
                 && !FreeSelectWaypointMode_ && !FreeSelectWaypointAWSMode_){
                 if (NextWaypointMode_){
@@ -485,9 +485,9 @@ void WaypointNav::Run()
                         }
                         IndexCinFlag = true;
                     });
-                    th_.join();
                 }
-                if (FreeSelectWaypointFlag_){
+                else if (FreeSelectWaypointFlag_){
+                    th_.join();
                     if (IndexCinFlag){
                         ((stoi(free_select_waypoint_index) >= waypoint_csv_.size()) || stoi(free_select_waypoint_index) <= 0) 
                             ? (waypoint_index_):(waypoint_index_ = stoi(free_select_waypoint_index) - 1);
@@ -499,7 +499,8 @@ void WaypointNav::Run()
             }
             else if (FreeSelectWaypointAWSMode_){
                 (waypoint_index_awsiot_ >= waypoint_csv_.size() || waypoint_index_awsiot_ <= 0) 
-                ? (waypoint_index_):(waypoint_index_ = waypoint_index_awsiot_ - 1);
+                    ? (waypoint_index_):(waypoint_index_ = waypoint_index_awsiot_ - 1);
+                WaypointSet(goal_);
                 FreeSelectWaypointAWSMode_ = false;
             }
         }
@@ -534,12 +535,13 @@ void WaypointNav::Run()
                         }
                         IndexCinFlag = true;
                     });
-                    th_.join();
                 }
                 else if (FreeSelectWaypointFlag_){
+                    th_.join();
                     if (IndexCinFlag){
                         ((stoi(free_select_waypoint_index) >= waypoint_csv_.size()) || stoi(free_select_waypoint_index) <= 0) 
                             ? (waypoint_index_):(waypoint_index_ = stoi(free_select_waypoint_index) - 1);
+                        WaypointSet(goal_);
                         FreeSelectWaypointMode_ = false;
                         FreeSelectWaypointFlag_ = false;
                     }
@@ -547,7 +549,8 @@ void WaypointNav::Run()
             }
             else if (FreeSelectWaypointAWSMode_){
                 (waypoint_index_awsiot_ >= waypoint_csv_.size() || waypoint_index_awsiot_ <= 0) 
-                ? (waypoint_index_):(waypoint_index_ = waypoint_index_awsiot_ - 1);
+                    ? (waypoint_index_):(waypoint_index_ = waypoint_index_awsiot_ - 1);
+                WaypointSet(goal_);
                 FreeSelectWaypointAWSMode_ = false;
             }
         }
