@@ -387,6 +387,18 @@ void WaypointNav::ModeFlagOff()
 
     GoalReachedFlag_        = false;
     ReStartFlag_            = false;
+
+    ForcedNextWaypointMode_ = false;
+    ForcedPrevWaypointMode_ = false;
+    ReturnToInitialPositionMode_ = false;
+    FreeSelectWaypointMode_ = false;
+
+    FreeSelectWaypointFlag_ = false;
+    FreeSelectWaypointAWSMode_ = false;
+
+    ActionRestartFlag_ = false;
+
+    FreeSelectWaypointAWSMode_ = false;
 }
 
 void WaypointNav::ModeFlagDebug()
@@ -451,17 +463,17 @@ void WaypointNav::Run()
             }
             else if (ForcedNextWaypointMode_){
                 WaypointNextSet(goal_);
-                ForcedNextWaypointMode_ = false;
+                ModeFlagOff();
                 ROS_INFO("%s: ForcedNextWaypointMode ON", node_name_.c_str());
             }
             else if (ForcedPrevWaypointMode_){
                 WaypointPrevSet(goal_);
-                ForcedPrevWaypointMode_ = false;
+                ModeFlagOff();
                 ROS_INFO("%s: ForcedPrevWaypointMode ON", node_name_.c_str());
             }
             else if (ReturnToInitialPositionMode_){
                 WaypointInitSet(goal_);
-                ReturnToInitialPositionMode_ = false;
+                ModeFlagOff();
                 ROS_INFO("%s: ReturnToInitialPositionMode ON", node_name_.c_str());
             }
             else if (FreeSelectWaypointMode_){
@@ -492,8 +504,7 @@ void WaypointNav::Run()
                         ((stoi(free_select_waypoint_index) >= waypoint_csv_.size()) || stoi(free_select_waypoint_index) <= 0) 
                             ? (waypoint_index_):(waypoint_index_ = stoi(free_select_waypoint_index) - 1);
                         WaypointSet(goal_);
-                        FreeSelectWaypointMode_ = false;
-                        FreeSelectWaypointFlag_ = false;
+                        ModeFlagOff();
                     }
                 }
             }
@@ -501,13 +512,13 @@ void WaypointNav::Run()
                 (waypoint_index_awsiot_ >= waypoint_csv_.size() || waypoint_index_awsiot_ <= 0) 
                     ? (waypoint_index_):(waypoint_index_ = waypoint_index_awsiot_ - 1);
                 WaypointSet(goal_);
-                FreeSelectWaypointAWSMode_ = false;
+                ModeFlagOff();
             }
         }
         else if (ActionRestartFlag_){
             ROS_INFO("%s: Move_base ActionRestart", node_name_.c_str());
-            ActionRestartFlag_ = false;
             ActionCancelFlag_ = false;
+            ModeFlagOff();
             WaypointSet(goal_);
         }
         else if (ActionCancelFlag_){
@@ -542,8 +553,7 @@ void WaypointNav::Run()
                         ((stoi(free_select_waypoint_index) >= waypoint_csv_.size()) || stoi(free_select_waypoint_index) <= 0) 
                             ? (waypoint_index_):(waypoint_index_ = stoi(free_select_waypoint_index) - 1);
                         WaypointSet(goal_);
-                        FreeSelectWaypointMode_ = false;
-                        FreeSelectWaypointFlag_ = false;
+                        ModeFlagOff();
                     }
                 }
             }
@@ -551,7 +561,7 @@ void WaypointNav::Run()
                 (waypoint_index_awsiot_ >= waypoint_csv_.size() || waypoint_index_awsiot_ <= 0) 
                     ? (waypoint_index_):(waypoint_index_ = waypoint_index_awsiot_ - 1);
                 WaypointSet(goal_);
-                FreeSelectWaypointAWSMode_ = false;
+                ModeFlagOff();
             }
         }
         ros::spinOnce();
