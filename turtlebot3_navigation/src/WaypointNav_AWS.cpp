@@ -369,10 +369,11 @@ void WaypointNav::WaypointPrevSet(move_base_msgs::MoveBaseGoal& prev)
 
 void WaypointNav::WaypointInitSet(move_base_msgs::MoveBaseGoal& init)
 {
-    init.target_pose.pose.position.x    = 0;
-    init.target_pose.pose.position.y    = 0;
-    init.target_pose.pose.orientation.z = 0;
-    init.target_pose.pose.orientation.w = 1;
+    waypoint_index_ = 0;
+    init.target_pose.pose.position.x    = stod(waypoint_csv_[waypoint_index_][0]);
+    init.target_pose.pose.position.y    = stod(waypoint_csv_[waypoint_index_][1]);
+    init.target_pose.pose.orientation.z = stod(waypoint_csv_[waypoint_index_][2]);
+    init.target_pose.pose.orientation.w = stod(waypoint_csv_[waypoint_index_][3]);
     init.target_pose.header.stamp       = ros::Time::now();
 
     ac_move_base_.sendGoal(init);
@@ -474,6 +475,7 @@ void WaypointNav::Run()
             else if (ReturnToInitialPositionMode_){
                 WaypointInitSet(goal_);
                 ModeFlagOff();
+                ActionCancelFlag_ = true;
                 ROS_INFO("%s: ReturnToInitialPositionMode ON", node_name_.c_str());
             }
             else if (FreeSelectWaypointMode_){
