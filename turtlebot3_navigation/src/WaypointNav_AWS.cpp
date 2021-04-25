@@ -205,7 +205,7 @@ void WaypointNav::WaypointMarkerArraySet(visualization_msgs::MarkerArray& waypoi
     geometry_msgs::Vector3 text;
     text.z = waypoint_area_threshold_/2;
     waypoint_number_txt.markers[index].scale = text;
-    waypoint_number_txt.markers[index].color.a = 0.9f;
+    waypoint_number_txt.markers[index].color.a = 1.0f;
     if (strategy_rviz_ > 0){
         waypoint_number_txt.markers[index].color.b = 1.0f;
         waypoint_number_txt.markers[index].color.g = 0.0f;
@@ -216,9 +216,14 @@ void WaypointNav::WaypointMarkerArraySet(visualization_msgs::MarkerArray& waypoi
         waypoint_number_txt.markers[index].color.g = 1.0f;
         waypoint_number_txt.markers[index].color.r = 0.0f;
     }
-    else if (strategy_rviz_ < 0){
+    else if (strategy_rviz_ < 0 && strategy_rviz_ >= -0.1){
         waypoint_number_txt.markers[index].color.b = 0.0f;
         waypoint_number_txt.markers[index].color.g = 0.0f;
+        waypoint_number_txt.markers[index].color.r = 1.0f;
+    }
+    else if (strategy_rviz_ < -0.1){
+        waypoint_number_txt.markers[index].color.b = 1.0f;
+        waypoint_number_txt.markers[index].color.g = 1.0f;
         waypoint_number_txt.markers[index].color.r = 1.0f;
     }
     /*___________________________________________________________________________________*/
@@ -258,6 +263,7 @@ void WaypointNav::DividedByStrategyArray(geometry_msgs::PoseArray& pose_array, v
     pose_array_vtr_[0].header.frame_id = "map";
     pose_array_vtr_[1].header.frame_id = "map";
     pose_array_vtr_[2].header.frame_id = "map";
+    pose_array_vtr_[3].header.frame_id = "map";
 
     waypoint_area_delete_ = waypoint_area;
     waypoint_number_txt_delete_ = waypoint_number_txt;
@@ -636,6 +642,13 @@ void WaypointNav::GoalCommandCb(const std_msgs::String& msg)
         way_area_array_.publish(waypoint_area_vtr_[2]);
         way_number_txt_array_.publish(waypoint_number_txt_vtr_[2]);
     }
+    else if (msg.data == "str4"){
+        way_pose_array_.publish(pose_array_vtr_[3]);
+        way_area_array_.publish(waypoint_area_delete_);
+        way_number_txt_array_.publish(waypoint_number_txt_delete_);
+        way_area_array_.publish(waypoint_area_vtr_[3]);
+        way_number_txt_array_.publish(waypoint_number_txt_vtr_[3]);
+    }
     else if (msg.data == "str123"){
         way_pose_array_.publish(pose_array_);
         way_area_array_.publish(waypoint_area_delete_);
@@ -694,6 +707,13 @@ void WaypointNav::AwsCb(const std_msgs::String& msg)
         way_number_txt_array_.publish(waypoint_number_txt_delete_);
         way_area_array_.publish(waypoint_area_vtr_[2]);
         way_number_txt_array_.publish(waypoint_number_txt_vtr_[2]);
+    }
+    else if (command["payload"]["action"] == "strategy4"){
+        way_pose_array_.publish(pose_array_vtr_[3]);
+        way_area_array_.publish(waypoint_area_delete_);
+        way_number_txt_array_.publish(waypoint_number_txt_delete_);
+        way_area_array_.publish(waypoint_area_vtr_[3]);
+        way_number_txt_array_.publish(waypoint_number_txt_vtr_[3]);
     }
     else if (command["payload"]["action"] == "strategy123"){
         way_pose_array_.publish(pose_array_);
