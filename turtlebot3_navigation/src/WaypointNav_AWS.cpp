@@ -77,7 +77,7 @@ void WaypointNav::PubSub_Init()
 
 void WaypointNav::ActionClient_Init()
 {
-    while (!ac_move_base_.waitForServer(ros::Duration(10.0))){
+    while (!ac_move_base_.waitForServer(ros::Duration(100.0))){
         ROS_ERROR("Waiting for the move_base action server to come up");
         exit(0);
     }
@@ -458,11 +458,12 @@ void WaypointNav::Run()
                         WaypointSet(goal_);
                 else if (ReStartWaypointMode_){
                     if (ReStartFlag_)
-                        WaypointSet(goal_);
+                        WaypointNextSet(goal_);
                 }
                 else if (GoalReachedMode_){
-                    if (WaypointAreaCheck() && GoalReachCheck())
+                    if (WaypointAreaCheck() && GoalReachCheck()){
                         WaypointSet(goal_);
+                    }
                 }
                 ModeFlagDebug();
                 ModeFlagDebugAWS();
@@ -603,7 +604,6 @@ void WaypointNav::GoalCommandCb(const std_msgs::String& msg)
     }
     else if (msg.data == "go" && MsgReceiveFlag_){
         ReStartFlag_ = true;
-        waypoint_index_++;
     }
     else if (msg.data == "q" && MsgReceiveFlag_){
         ROS_INFO("%s: Shutdown now ('o')/ bye bye~~~", node_name_.c_str());
@@ -669,7 +669,6 @@ void WaypointNav::AwsCb(const std_msgs::String& msg)
     }
     else if (command["payload"]["action"] == "start" && MsgReceiveFlag_){
         ReStartFlag_ = true;
-        waypoint_index_++;
     }
     else if (command["payload"]["action"] == "next" && MsgReceiveFlag_)
         ForcedNextWaypointMode_ = true;
