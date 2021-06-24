@@ -4,14 +4,8 @@
 
 typedef actionlib::SimpleActionClient<move_base_msgs::MoveBaseAction> MoveBaseClient;
 
-struct MyPose {
-  double x;
-  double y;
-  double yaw;
-};
 
 int main(int argc, char** argv){
-  MyPose way_point[] = {2.0, 1.0, 0.5 * M_PI};
 
   ros::init(argc, argv, "simple_goal");
 
@@ -36,8 +30,8 @@ int main(int argc, char** argv){
   int i = 0;
   while (ros::ok()) {
     // ROSではロボットの進行方向がx座標、左方向がy座標、上方向がz座標
-    goal.target_pose.pose.position.x =  way_point[i].x;
-    goal.target_pose.pose.position.y =  way_point[i].y;
+    goal.target_pose.pose.position.x =  1;
+    goal.target_pose.pose.position.y =  1;
     goal.target_pose.pose.orientation.w = 1; 
 
     ROS_INFO("Sending goal: No.%d", i+1);
@@ -57,6 +51,9 @@ int main(int argc, char** argv){
       ROS_INFO("Failed: No.%d (%s)",i+1, state.toString().c_str());
     }
     i++;
+    
+    ros::Duration duration(1);
+    duration.sleep();
   }
   return 0;
 }
