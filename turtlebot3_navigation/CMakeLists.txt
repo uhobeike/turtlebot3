@@ -49,6 +49,10 @@ target_link_libraries(
   ${catkin_LIBRARIES}
 )
 
+#waypoint_rviz
+add_executable(simple_goal src/simple_goal.cpp)
+target_link_libraries(simple_goal ${catkin_LIBRARIES})
+
 ################################################################################
 # Install
 ################################################################################
