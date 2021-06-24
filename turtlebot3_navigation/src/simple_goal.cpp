@@ -28,7 +28,7 @@ int main(int argc, char** argv){
   ROS_INFO("The server comes up");
   move_base_msgs::MoveBaseGoal goal;
   // base_link座標系（ロボット座標系)
-  goal.target_pose.header.frame_id = "base_link";
+  goal.target_pose.header.frame_id = "map";
   // 現在時刻                                                                       
   goal.target_pose.header.stamp = ros::Time::now();
 
